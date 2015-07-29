@@ -1,0 +1,41 @@
+
+model{
+for (i in 1:nSNP){
+# likelihood
+z[i] ~ dbin(theta[i],N[i])
+#prior
+theta[i] ~ dbeta(a[mixture[i]],b[mixture[i]])
+mixture[i] ~ dcat(p[1:Nclust])
+p_theta[i] <- p[1]*dbeta(theta[i],a[1],b[1])+p[2]*dbeta(theta[i],a[2],b[2])+p[3]*dbeta(theta[i],a[3],b[3])
+log.likelihood[i] <- log(p_theta[i]*dbin(z[i],theta[i],N[i]))
+}
+# hyperprior
+for (clustID in 1:2){
+a[clustID] <- mu[clustID]*kappa
+b[clustID] <- (1-mu[clustID])*kappa
+p[clustID] <- 0.495
+}
+for (i in 1:nSites){
+      # likelihood
+      # coverage for all the other sites
+      N_cov[i] ~ dnegbin(p_cov,r_cov)
+      log.cov_likelihood[i] <- log(dnegbin(N_cov[i],p_cov,r_cov))
+    }
+  #prior
+p_cov <- r_cov/(r_cov+m_cov)
+m_cov <- m0*(2-f)/2
+r_cov ~ dgamma(0.01,0.01)
+f ~ dbeta(1,1)
+p[3] <- 0.01
+a[3] <- 1
+b[3] <- 1
+kappa ~ dgamma(1,0.1)
+d1 <- m*f*(1-m)/(1-f+m*f)
+d2 <- m*f*(1-m)/(1-m*f)
+mu[1] <- m+d1
+mu[2] <- m-d2
+# report likelihood
+aaf.like <- sum(log.likelihood[1:nSNP])
+cov.like <- sum(log.cov_likelihood[1:nSites])
+sum.like <- aaf.like+cov.like
+}

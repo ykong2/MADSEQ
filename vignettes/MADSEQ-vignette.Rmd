@@ -1,0 +1,318 @@
+---
+title: "R Package MADSEQ"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{R Package MADSEQ}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+The MADSEQ package is a hierarchical Bayesian model for the detection and quantification of potential mosaic aneuploidy in sample using next generation sequencing data. 
+
+The MADSEQ package takes two pieces of information for the detection and quantification of mosaic aneuploidy:
+
+1. The distribution of the alternative allele frequencies (AAF) of the sites that are genotyped as heterozygous .
+1. The sequencing depth for each site (including all the sites with all the genotypes).
+
+There are four different models in MADSEQ package, they are designed for different types of mosaic aneuploidy:
+
+* normal chromosome model
+* mosaic monosomy model
+* mosaic mitotic trisomy model
+* mosaic meiotic trisomy model
+
+MADSEQ works on the chromosome resolution. It applies all of the four models to fit the distribution of the alternative allele frequencies of all the heterozygous sites, and fit the distribution of the sequence depth of all the sites for that chromosome. After fitting the same data using four models, it does model comparison using BIC (Bayesian Information Criteria) to select the best model. The model selected tells us whether the chromosome is aneuploid or not, and also the type of mosaic aneuploidy. Then, from the posterior distribution of the best model, we could get the estimation of the fraction of aneuploidy cells in the sample.
+
+## Data Preparation
+
+Before applying MADSEQ to your data, you need to process your data first to meet the requirement of the MADSEQ package. Here describes how to prepare the data for MADSEQ package.
+
+1. A dataframe contains the heterozygous sites from the chromosome you are interested in:
+
+    Put the heterozygous sites of the target chromosome into a dataframe. Each row represents a site. MADSEQ reauires at least four fields named as below in the dataframe:
+    
+    * __chr__ : the chromosome number
+    * __position__ : the position of the site
+    * __Ref_D__ : read depth for the reference allele
+    * __Alt_D__ : read depth for the alternative allele
+    
+    In the dataframe, each row represents a locus on the target chromosome, and each column contains one of the four fields that required.    
+    You should make sure that all the loci you put in the dataframe are from **the same chromosome**, and they are all **heterozygous**.
+    
+2. A numeric vector contains the read depth for all the sites from the same chromosome, and a numeric number contains the average coverage for the whole genome.
+
+
+### check if your dataframe meet the requirements:
+
+Use the `validateData()` function to check if your dataframe meet all the requirements and could be taken as the input for further analysis by MADSEQ. If the dataframe meets the requirements, it will return TRUE. If it doesn't meet the requirement, it will give an error explaining why it fails.
+
+```{r,error=TRUE,collapse=TRUE}
+# check if the dataframe "aneuploidy" is valid for MADSEQ analysis
+library("MADSEQ")
+data(aneuploidyChrom)
+data(invalid)
+
+validateData(aneuploidyChrom)
+
+validateData(invalid)
+
+```
+
+## Run Models
+
+When the data is ready, you can begin to apply the four models (normal, monosomy, mitotic trisomy, meiotic trisomy) to fit your data respectively using `runModelOne()`, `runModelMonosomy()`, `runModelTrisomy()`, `runModelFour()` functions.
+
+1. Use the **normal model** to fit the data
+```{r,eval=FALSE}
+# use the normal model to fit the aneuploidy data
+require("rjags")
+normal = runModelOne(data=aneuploidyChrom, data_coverage = aneuploidy_coverage, 
+                     control_coverage = genome_coverage, checkConvergence=T,plot=T)
+# If checkConvergence is TRUE, it will check the convergence of the posterior distribution.
+# If plot is TRUE, it will plot the alternative allele frequency along the chromosome.
+# The function will return a MadSeqOutput object. 
+## [1] "converged!"
+```
+
+```{r, fig.height=3, fig.width=5,fig.align='center',echo=FALSE}
+par(mar=c(2,4,2,2))
+plot(aneuploidyChrom$position,aneuploidyChrom$Alt_D/(aneuploidyChrom$Alt_D+aneuploidyChrom$Ref_D),pch=20,col="blue",ylim=c(0,1),xlab="position",ylab="Alternative Allele Frequency")
+abline(h=mean(aneuploidyChrom$Alt_D/(aneuploidyChrom$Alt_D+aneuploidyChrom$Ref_D)),lwd=3,lty=2)
+```
+
+```{r,eval=FALSE}
+# The object of class MadSeqOutput has its own print method
+print(normal)
+## Posterior Distribution for Parameters
+##          mean        95% HDI
+## kappa   6.930   [5.58, 8.32]
+## mu      0.464 [0.464, 0.464]
+## m_cov 130.000     [130, 130]
+## 
+## BIC
+## [1] 4388.487
+# you can check the full description of each parameters at the end of this document.
+```
+
+2. Use the **mosaic monosomy** model to fit the data
+```{r,eval=FALSE}
+# use mosaic monosomy model to fit the aneuploidy data
+monosomy = runModelMonosomy(data=aneuploidyChrom, data_coverage = aneuploidy_coverage, 
+                     control_coverage = genome_coverage, checkConvergence=T,plot=F)
+## [1] "converged!"
+
+print(monosomy)
+## Posterior Distribution for Parameters
+##           mean             95% HDI
+## f     1.23e-02    [7.1e-07, 0.036]
+## kappa 6.92e+00        [5.59, 8.31]
+## mu[1] 4.67e-01      [0.464, 0.473]
+## mu[2] 4.61e-01      [0.455, 0.464]
+## d1    3.11e-03 [1.77e-07, 0.00913]
+## d2    3.10e-03 [1.77e-07, 0.00911]
+## m_cov 1.29e+02          [128, 130]
+## 
+## BIC
+## [1] 4400.909
+```
+
+3. Use the **mosaic mitotic trisomy** model to fit the data
+```{r,eval=FALSE}
+# use mosaic mitotic trisomy model to fit the aneuploidy data
+mitotic_trisomy = runModelTrisomy(data=aneuploidyChrom, data_coverage = aneuploidy_coverage, 
+                     control_coverage = genome_coverage, checkConvergence=T,plot=F)
+
+## [1] "converged!"
+
+print(mitotic_trisomy)
+## Posterior Distribution for Parameters
+##           mean         95% HDI
+## f       0.3970  [0.242, 0.567]
+## kappa   9.1400    [6.46, 12.3]
+## mu[1]   0.5470  [0.518, 0.576]
+## mu[2]   0.3830   [0.355, 0.41]
+## d1      0.0828 [0.0546, 0.112]
+## d2      0.0808 [0.0537, 0.108]
+## m_cov 156.0000      [146, 167]
+## 
+## BIC
+## [1] 4371.348
+```
+
+4. Use the **mosaic meiotic trisomy** model to fit the data
+```{r,eval=FALSE}
+# use mosaic meiotic trisomy model to fit the aneuploidy data
+meiotic_trisomy = runModelFour(data=aneuploidyChrom, data_coverage = aneuploidy_coverage, 
+                     control_coverage = genome_coverage, checkConvergence=T,plot=F)
+
+## [1] "converged!"
+
+print(meiotic_trisomy)
+## Posterior Distribution for Parameters
+##          mean        95% HDI
+## f       0.538 [0.498, 0.579]
+## p[1]    0.356   [0.32, 0.39]
+## p[2]    0.356   [0.32, 0.39]
+## p[3]    0.139 [0.105, 0.175]
+## p[4]    0.139 [0.105, 0.175]
+## p[5]    0.010   [0.01, 0.01]
+## kappa 102.000      [60, 144]
+## mu[1]   0.571 [0.564, 0.577]
+## mu[2]   0.360 [0.354, 0.366]
+## mu[3]   0.189   [0.177, 0.2]
+## mu[4]   0.763 [0.749, 0.777]
+## d1      0.107 [0.101, 0.113]
+## d2      0.104 [0.0977, 0.11]
+## d3      0.189   [0.177, 0.2]
+## d4      0.237 [0.223, 0.251]
+## m_cov 165.000     [162, 168]
+## 
+## BIC
+## [1] 4296.878
+```
+
+
+## Model Comparison
+
+After fit the data with all the models, next step is compare the goodness of fit of these models using BIC. The `modelSelection()` function will return the model fit the data best. The `modelComparison()` function will calculate the delta BIC between the best model and other models. 
+
+```{r, eval=FALSE}
+best_model = modelSelection(normal, monosomy, mitotic_trisomy, meiotic_trisomy)
+## Order of the preference of models
+##     four  trisomy      one monosomy 
+## 4296.408 4371.318 4388.490 4400.791 
+## 
+## Best Model
+##     four 
+## 4296.408 
+
+best_model
+## [1] "four"
+
+deltaBIC = modelComparison(normal, monosomy, mitotic_trisomy, meiotic_trisomy)
+
+deltaBIC
+##    four   trisomy       one   monosomy 
+## 0.00000  74.91026  92.08182  104.38283 
+
+```
+
+The value of delta BIC suggests the strength of the evidence against the model with the higher BIC value. It can be summarized as
+
+```{r,echo=FALSE,warning=FALSE}
+data(meiotic_trisomy)
+BIC = c("[0,2]","(2,6]","(6,10]",">10")
+evidence = c("Not worth more than a bare mention","Positive","Strong","Very Strong")
+table = data.frame(BIC,evidence)
+library(knitr)
+kable(table,col.names =c("deltaBIC","Evidence against higher BIC") ,align="c")
+```
+
+So in the "aneuploidy" data, the model **meiotic trisomy** is selected with strong evidence against other models.
+
+## Analyze Posterior Distribution
+After you get the best model selected, you can get the estimation of the fraction of aneuploidy cells as well as other parameters using the output (an object of MadSeqOutput class, which is produced by one of the `runModel()` functions) from that model.
+
+**Note: you can check the full description of each parameter at the end of this document.**
+
+### Access Sampled Posterior Disbribution
+The sampled posterior distribution from the model is stored in the object of MadSeqOutput class. You can access the posterior distribution of all the parameters by checking the output.
+```{r,eval=TRUE,collapse=TRUE}
+# The object of MadSeqOutput class has two component:
+# 1.posterior: a matrix stores the sampled posterior distribution;
+# 2.BIC: the BIC value for this model
+str(meiotic_trisomy)
+```
+```{r,eval=FALSE}
+# You can access the full posterior distribution by
+meiotic_trisomy$posterior
+
+# or
+
+meiotic_trisomy["posterior"]
+
+# In the matrix, each column is one parameter, each row is a sampled value for that parameter.
+```
+
+
+### Statistics of Posterior Disbribution
+The `print()` function for MadSeqOutput class will print out the mean and 95% highest density interval (95% HDI) of the posterior estimation for each parameters in the model.
+
+```{r,eval=FALSE}
+print(meiotic_trisomy)
+## Posterior Distribution for Parameters
+##          mean        95% HDI
+## f       0.538 [0.498, 0.579]
+## p[1]    0.356   [0.32, 0.39]
+## p[2]    0.356   [0.32, 0.39]
+## p[3]    0.139 [0.105, 0.175]
+## p[4]    0.139 [0.105, 0.175]
+## p[5]    0.010   [0.01, 0.01]
+## kappa 102.000      [60, 144]
+## mu[1]   0.571 [0.564, 0.577]
+## mu[2]   0.360 [0.354, 0.366]
+## mu[3]   0.189   [0.177, 0.2]
+## mu[4]   0.763 [0.749, 0.777]
+## d1      0.107 [0.101, 0.113]
+## d2      0.104 [0.0977, 0.11]
+## d3      0.189   [0.177, 0.2]
+## d4      0.237 [0.223, 0.251]
+## m_cov 165.000     [162, 168]
+## 
+## BIC
+## [1] 4296.878
+```
+
+The `summary()` function for MadSeqOutput class will produce the quantiles of the parameters from the posterior distribution.
+
+```{r,eval=FALSE}
+summary(meiotic_trisomy)
+##        f               p[1]             p[2]             p[3]              p[4]         
+##  Min.   :0.4649   Min.   :0.2849   Min.   :0.2849   Min.   :0.07397   Min.   :0.07397 
+##  1st Qu.:0.5233   1st Qu.:0.3436   1st Qu.:0.3436   1st Qu.:0.12697   1st Qu.:0.12697    
+##  Median :0.5370   Median :0.3559   Median :0.3559   Median :0.13905   Median :0.13905  
+##  Mean   :0.5375   Mean   :0.3556   Mean   :0.3556   Mean   :0.13936   Mean   :0.13936    
+##  3rd Qu.:0.5513   3rd Qu.:0.3680   3rd Qu.:0.3680   3rd Qu.:0.15140   3rd Qu.:0.15140    
+##  Max.   :0.6163   Max.   :0.4210   Max.   :0.4210   Max.   :0.21010   Max.   :0.21010     
+##      kappa            mu[1]            mu[2]            mu[3]            mu[4]           
+##  Min.   : 37.28   Min.   :0.5589   Min.   :0.3486   Min.   :0.1674   Min.   :0.7373     
+##  1st Qu.: 86.92   1st Qu.:0.5685   1st Qu.:0.3580   1st Qu.:0.1846   1st Qu.:0.7584  
+##  Median :100.58   Median :0.5707   Median :0.3601   Median :0.1885   Median :0.7631    
+##  Mean   :101.99   Mean   :0.5708   Mean   :0.3601   Mean   :0.1886   Mean   :0.7630    
+##  3rd Qu.:115.53   3rd Qu.:0.5730   3rd Qu.:0.3622   3rd Qu.:0.1925   3rd Qu.:0.7678   
+##  Max.   :198.72   Max.   :0.5830   Max.   :0.3713   Max.   :0.2105   Max.   :0.7882  
+#.......
+```
+
+
+###Plot Posterior
+The `plotPosterior()` function takes the object of MadSeqOutput class as the input, and print out the posterior disbribution for each parameters in the model. 
+
+```{r, fig.height=4, fig.width=6,fig.align='center'}
+# you can specify the parameters that you are interested in using variable option
+# otherwise the default setting will plot all the parameters 
+plotPosterior(meiotic_trisomy,variable = c("f","kappa","mu[1]","mu[2]","mu[3]","mu[4]"))
+```        
+    
+    
+The `plotFraction()` function will plot the disbribution of the fraction of aneuploidy cells, labeling the mean and Highest posterior density invertals you specified (default: 95% HDI)
+```{r, fig.height=3, fig.width=4,fig.align='center'}
+par(mar=c(2,2,2,2))
+plotFraction(meiotic_trisomy,prob=0.95)
+```    
+    
+The `plotMixture()` function will plot the posterior distributions of the alternative allele frequencies. From this plot, you can get some sense about the mean of each mixture, the weight of each mixture and the distance between mixtures.
+```{r, fig.height=3, fig.width=5,fig.align='center'}
+par(mar=c(3,4,2,2))
+plotMixture(meiotic_trisomy)
+```
+
+## Description of All Parameters
+```{r,echo=FALSE,warning=FALSE}
+parameters = c("f","m","mu[1]","mu[2]","mu[3]","mu[4]","kappa","p[1]","p[2]","p[3]","p[4]","p[5]","d1","d2"     
+               ,"d3","d4","m_cov","p_cov","r_cov")
+explains = c("Fraction of mosaic aneuploidy","The midpoint","Mean of mixture 1: the AAFs of this mixture shifted from midpoint to some higher values", "Mean of mixture 2: the AAFs of this mixture shifted from midpoint to some lower values","Mean of mixture 3: the AAFs of this mixture shifted from 0 to some higher value (only in meiotic model)","Mean of mixture 4: the AAFs of this mixture shifted from 1 to some lower value (only in meiotic model)","Indicate variance of the AAF mixtures: larger kappa means smaller variance","Weight of mixture 1 (=p[2]): indicate the proportion of heterozygous sites in the mixture 1","Weight of mixture 2 (=p[1]): indicate the proportion of heterozygous sites in the mixture 2","Weight of mixture 3 (=p[4]): indicate the proportion of heterozygous sites in the mixture 3 (only in meiotic model)","Weight of mixture 4 (=p[3]): indicate the proportion of heterozygous sites in the mixture 4 (only in meiotic model)","Weight of outlier component (=0.01): the AAF of 1% sites might not well behaved, so these sites are treated as noise.","Distance that mixture 1 shifted from the midpoint","Distance that mixture 2 shifted from the midpoint","Distance that mixture 3 shifted from 0 (only in meiotic model)","Distance that mixture 4 shifted from 1 (only in meiotic model)","Mean coverage of all the sites from the chromosome, estimated from a negative binomial distribution","Prob of the negative binomial distribution for the coverage","Another parameter (r) for the negative binomial disbribution, small r means large variance")
+table = data.frame(parameters,explains)
+kable(table,col.names =c("parameters","description") ,align="c")
+```

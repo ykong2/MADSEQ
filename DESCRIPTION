@@ -1,0 +1,15 @@
+Package: MADSEQ
+Type: Package
+Title: Mosaic Aneuploidy Detection using Sequencing Data
+Version: 1.0
+Date: 2015-07-09
+Author: person("Yu","Kong",email="yu.kong@phd.einstein.yu.edu",role=c("aut","cre"))
+Maintainer: Yu Kong <yu.kong@phd.einstein.yu.edu>
+Description: The MADSEQ package provides a group of hierarchical Bayeisan models for the detection of mosaic aneuploidy, the inference of the type of aneuploidy and also the quantification of the level of mosaic aneuploidy.
+License: GPL-3
+Depends: R(>= 2.14.0)
+Suggests: knitr
+VignetteBuilder: knitr
+LazyData: True
+Imports: rjags,
+    coda
