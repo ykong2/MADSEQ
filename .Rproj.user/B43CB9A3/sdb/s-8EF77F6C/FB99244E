@@ -1,0 +1,16 @@
+{
+    "contents" : "#-----------------------DOCUMENTATION PACKAGE--------------------\n#' Mosaic Aneuploidy Detection using Sequencing Data (MADSEQ)\n#' \n#' The MADSEQ package provides a group of hierarchical Bayeisan models for the detection of mosaic aneuploidy, \n#' the inference of the type of aneuploidy and also the quantification of the level of mosaic aneuploidy. These models\n#' use Markov Chain Monte Carlo to sample the posterior distributions of parameters related to mosaic aneuploidy.\n#' \n#' MADSEQ is a group of hierarchical Bayesian models used for the detection of mosaic aneuploidy. The MADSEQ model uses\n#' the \"rjags\" model to sample the posterior distribution of the parameters related to mosaic aneuploidy. To fully understand\n#' how to use the MADSEQ package, please refer to the documentation. The manual explains what data do you need, and how to process\n#' the data to be ready for the model, what steps to follow and how to interpret the output from our model.\n#' \n#' @author Yu Kong\n#' @docType package\n#' @name MADSEQ-package\n#' @references Martyn Plummer (2015). rjags: Bayesian Graphical Models using MCMC. R package version 3-15. http://CRAN.R-project.org/package=rjags\nNULL\n#>NULL",
+    "created" : 1438281011429.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4052216945",
+    "id" : "FB99244E",
+    "lastKnownWriteTime" : 1438268318,
+    "path" : "~/Project/Aneuploidy/MADSEQ/R/MADSEQ.R",
+    "project_path" : "R/MADSEQ.R",
+    "properties" : {
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}

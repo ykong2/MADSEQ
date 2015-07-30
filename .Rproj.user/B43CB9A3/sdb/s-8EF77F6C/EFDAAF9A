@@ -1,0 +1,16 @@
+{
+    "contents" : "#----------------------Document the Example Data--------------------\n\n#----------------------Aneuploidy Data----------------------------\n#' Sequencing data for one chromosome with mosaic aneuploidy\n#' \n#' Sequencing data for 200 heterozygous sites of one chormosome with mosaic aneuploidy, and sequencing depth for\n#' all the sites from this chromosome, and average depth for the whole genome\n#' \n#' @docType data\n#' @usage data(aneuploidyChrom)\n#' @format A data frame with 200 rows and 4 variables:\n#' \\describe{\n#' \\item{chr}{chromosome}\n#' \\item{position}{locus of the site, in hg19}\n#' \\item{Ref_D}{read depth for reference allele}\n#' \\item{Alt_D}{read depth for alternative allele}\n#' A numeric vector with 300 values indicating sequencing read depth for all 300 sites.\n#' An integer indicates the average sequencing depth for the whole genome.\n#' }  \n#' @keywords datasets\n\"aneuploidyChrom\"\n\n#' @rdname aneuploidyChrom\n\"aneuploidy_coverage\"\n\n#' @rdname aneuploidyChrom\n\"genome_coverage\"\n\n\n#----------------------Normal Data----------------------------\n#' Sequencing data for a normal chromosome\n#' \n#' Sequencing data for 500 heterozygous sites of one normal chormosome, and sequencing depth for all the sites from this chromosome\n#' \n#' @docType data\n#' @usage data(normalChrom)\n#' @format A data frame with 500 rows and 4 variables:\n#' \\describe{\n#' \\item{chr}{chromosome}\n#' \\item{position}{locus of the site, in hg19}\n#' \\item{Ref_D}{read depth for reference allele}\n#' \\item{Alt_D}{read depth for alternative allele}\n#' A numeric vector with 1060 values indicating sequencing read depth for all 1060 sites.\n#' An integer indicates the average sequencing depth for the whole genome.\n#' }\n#' @keywords datasets\n\"normalChrom\"\n\n#' @rdname normalChrom\n\"normal_coverage\"\n\n\n#------------------------ Invalid Data----------------------------\n#' A dataset does not pass the requirement of MADSEQ package\n#' \n#' An example of data that does not meet the requirement of the package.\n#' \n#' @docType data\n#' @usage data(invalid)\n#' @format A data frame with 100 rows and 4 variables:\n#' \\describe{\n#' \\item{chr}{chromosome}\n#' \\item{position}{locus of the site, in hg19}\n#' \\item{Ref_D}{read depth for reference allele}\n#' \\item{Alt_D}{read depth for alternative allele}\n#' }\n#' @keywords datasets\n\"invalid\"\n\n\n#------------------------ Invalid Data----------------------------\n#' A MadSeqOutput from meiotic trisomy model\n#' \n#' An example of MadSeqOutput from one of the MADSEQ models\n#' \n#' @docType data\n#' @usage data(meiotic_trisomy)\n#' @format An object of MadSeqOutput class, with two components:\n#' \\describe{\n#' \\item{posterior}{posteior disbribution of all parameters}\n#' \\item{BIC}{BIC value for this model}\n#' }\n#' @keywords datasets\n\"meiotic_trisomy\"",
+    "created" : 1438281012940.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1239158243",
+    "id" : "EFDAAF9A",
+    "lastKnownWriteTime" : 1438281039,
+    "path" : "~/Project/Aneuploidy/MADSEQ/R/data.R",
+    "project_path" : "R/data.R",
+    "properties" : {
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
