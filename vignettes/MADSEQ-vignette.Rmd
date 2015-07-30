@@ -22,7 +22,7 @@ There are four different models in MADSEQ package, they are designed for differe
 * mosaic mitotic trisomy model
 * mosaic meiotic trisomy model
 
-MADSEQ works on the chromosome resolution. It applies all of the four models to fit the distribution of the alternative allele frequencies of all the heterozygous sites, and fit the distribution of the sequence depth of all the sites for that chromosome. After fitting the same data using four models, it does model comparison using BIC (Bayesian Information Criteria) to select the best model. The model selected tells us whether the chromosome is aneuploid or not, and also the type of mosaic aneuploidy. Then, from the posterior distribution of the best model, we could get the estimation of the fraction of aneuploidy cells in the sample.
+MADSEQ works on the chromosome resolution. It applies all of the four models to fit the distribution of the alternative allele frequencies of the heterozygous sites, and fit the distribution of the sequence depth of all the sites from that chromosome. After fitting the same data using four models, it does model comparison using BIC (Bayesian Information Criteria) to select the best model. The model selected tells us whether the chromosome is aneuploid or not, and also the type of mosaic aneuploidy. Then, from the posterior distribution of the best model, we could get the estimation of the fraction of aneuploidy cells.
 
 ## Data Preparation
 
@@ -30,14 +30,14 @@ Before applying MADSEQ to your data, you need to process your data first to meet
 
 1. A dataframe contains the heterozygous sites from the chromosome you are interested in:
 
-    Put the heterozygous sites of the target chromosome into a dataframe. Each row represents a site. MADSEQ reauires at least four fields named as below in the dataframe:
+    Put the heterozygous sites of the target chromosome into a dataframe. Each row represents a site. MADSEQ requires at least four fields named as below in the dataframe:
     
     * __chr__ : the chromosome number
-    * __position__ : the position of the site
+    * __position__ : the position (locus) of the site
     * __Ref_D__ : read depth for the reference allele
     * __Alt_D__ : read depth for the alternative allele
     
-    In the dataframe, each row represents a locus on the target chromosome, and each column contains one of the four fields that required.    
+    In the dataframe, each row represents a locus on the target chromosome, and each column contains one of the four fields.    
     You should make sure that all the loci you put in the dataframe are from **the same chromosome**, and they are all **heterozygous**.
     
 2. A numeric vector contains the read depth for all the sites from the same chromosome, and a numeric number contains the average coverage for the whole genome.
@@ -92,7 +92,7 @@ print(normal)
 ## 
 ## BIC
 ## [1] 4388.487
-# you can check the full description of each parameters at the end of this document.
+# you can check the full description of each parameters at the end of this page.
 ```
 
 2. Use the **mosaic monosomy** model to fit the data
@@ -175,7 +175,7 @@ print(meiotic_trisomy)
 
 ## Model Comparison
 
-After fit the data with all the models, next step is compare the goodness of fit of these models using BIC. The `modelSelection()` function will return the model fit the data best. The `modelComparison()` function will calculate the delta BIC between the best model and other models. 
+After fit the data with all the models, next step is comparison of the goodness of fit of these models using BIC. The `modelSelection()` function will return the model fit the data best. The `modelComparison()` function will calculate the delta BIC between the best model and other models. 
 
 ```{r, eval=FALSE}
 best_model = modelSelection(normal, monosomy, mitotic_trisomy, meiotic_trisomy)
@@ -214,7 +214,7 @@ So in the "aneuploidy" data, the model **meiotic trisomy** is selected with stro
 ## Analyze Posterior Distribution
 After you get the best model selected, you can get the estimation of the fraction of aneuploidy cells as well as other parameters using the output (an object of MadSeqOutput class, which is produced by one of the `runModel()` functions) from that model.
 
-**Note: you can check the full description of each parameter at the end of this document.**
+**Note: you can check the full description of each parameter at the end of this documentation.**
 
 ### Access Sampled Posterior Disbribution
 The sampled posterior distribution from the model is stored in the object of MadSeqOutput class. You can access the posterior distribution of all the parameters by checking the output.
