@@ -6,8 +6,8 @@ MADSEQ-R package for mosaic aneuploidy detection
 # Quick Start
 ## Dependencies
 * R (latest version recommended)
-* JAGS
-* R package: rjags
+* [JAGS](http://mcmc-jags.sourceforge.net/)
+* R package: [rjags](https://cran.r-project.org/web/packages/rjags/index.html), or visit their [GitHub](https://github.com/cran/rjags)
 
 ## Install 
 
