@@ -3,18 +3,18 @@
 #----------------------Aneuploidy Data----------------------------
 #' Sequencing data for one chromosome with mosaic aneuploidy
 #' 
-#' Sequencing data for 500 heterozygous sites of one chormosome with mosaic aneuploidy, and sequencing depth for
+#' Sequencing data for 200 heterozygous sites of one chormosome with mosaic aneuploidy, and sequencing depth for
 #' all the sites from this chromosome, and average depth for the whole genome
 #' 
 #' @docType data
 #' @usage data(aneuploidyChrom)
-#' @format A data frame with 500 rows and 4 variables:
+#' @format A data frame with 200 rows and 4 variables:
 #' \describe{
 #' \item{chr}{chromosome}
 #' \item{position}{locus of the site, in hg19}
 #' \item{Ref_D}{read depth for reference allele}
 #' \item{Alt_D}{read depth for alternative allele}
-#' A numeric vector with 1060 values indicating sequencing read depth for all 1060 sites.
+#' A numeric vector with 300 values indicating sequencing read depth for all 300 sites.
 #' An integer indicates the average sequencing depth for the whole genome.
 #' }  
 #' @keywords datasets

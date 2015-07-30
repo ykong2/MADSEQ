@@ -41,16 +41,24 @@ Before applying MADSEQ to your data, you need to process your data first to meet
     You should make sure that all the loci you put in the dataframe are from **the same chromosome**, and they are all **heterozygous**.
     
 2. A numeric vector contains the read depth for all the sites from the same chromosome, and a numeric number contains the average coverage for the whole genome.
-
+  
+  
+**Note**: sometimes the sequencing data can be noisy, you may need to filter/process your data before the application of MADSEQ models. The coverage of sequencing data usually is biased because of GC content, you may need to normalize your read depth by GC content. If you have a large sample size, you can quantile normalize the read depth as well.
 
 ### check if your dataframe meet the requirements:
+
+**Note**: the following example use the example data comes with the package. To load the data use function `data(aneuploidyChrom)`. To get help with the example data by `?aneuploidyChrom`.
 
 Use the `validateData()` function to check if your dataframe meet all the requirements and could be taken as the input for further analysis by MADSEQ. If the dataframe meets the requirements, it will return TRUE. If it doesn't meet the requirement, it will give an error explaining why it fails.
 
 ```{r,error=TRUE,collapse=TRUE}
 # check if the dataframe "aneuploidy" is valid for MADSEQ analysis
 library("MADSEQ")
+# load the sample data aneuploidyChrom, the data set includes the dataframe for heterozygous sites
+# read depth for each site and average depth for the whole genome
 data(aneuploidyChrom)
+
+# load the sample data invalid
 data(invalid)
 
 validateData(aneuploidyChrom)
