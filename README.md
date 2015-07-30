@@ -1,5 +1,6 @@
 # MADSEQ
-MADSEQ-R package for mosaic aneuploidy detection
+MADSEQ-R package for mosaic aneuploidy detection  
+
 [GitHub page: http://ykong2.github.io/MADSEQ/](http://ykong2.github.io/MADSEQ/)
 
 # Quick Start
@@ -10,12 +11,12 @@ MADSEQ-R package for mosaic aneuploidy detection
 
 ## Install 
 
-### Install from GitHub
+** Install from GitHub**
 ```{r}
 library(devtools)
 install_github("ykong2/MADSEQ", build_vignettes=TRUE)
 ```
-### Install from from [tarball](http://ykong2.github.io/MADSEQ/)
+** Install from from [tarball](http://ykong2.github.io/MADSEQ/)**
 ```{r}
 install.packages("directory_to_the_downloaded_package/file_name_MADSEQ.tar.gz")
 ```{r}
