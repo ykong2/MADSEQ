@@ -45,6 +45,34 @@ Before applying MADSEQ to your data, you need to process your data first to meet
   
 **Note**: sometimes the sequencing data can be noisy, you may need to filter/process your data before the application of MADSEQ models. The coverage of sequencing data usually is biased because of GC content, you may need to normalize your read depth by GC content. If you have a large sample size, you can quantile normalize the read depth as well.
 
+### Example Data
+
+There are two sets of example data come with the package, the one named "aneuploidyChrom" is the data for a chromosome with aneuploidy, the data named "normalChrom" is the data for a normla chromosome.
+
+**Note**: Your data should at least have the fields showed in the example data.
+
+```{r,collapse=TRUE}
+# load the package
+library("MADSEQ")
+# To load the aneuploidy data
+data(aneuploidyChrom)
+# There is one dataframe with the heterozygous sites, one vector with coverage, 
+# and a number with coverage for the whole genome
+# Check the data
+head(aneuploidyChrom)
+head(aneuploidy_coverage)
+genome_coverage
+
+# To load the normal data
+data(normalChrom)
+# To check the data
+head(normalChrom)
+head(normal_coverage)
+
+```
+
+
+
 ### check if your dataframe meet the requirements:
 
 **Note**: the following example use the example data comes with the package. To load the data use function `data(aneuploidyChrom)`. To get help with the example data by `?aneuploidyChrom`.
@@ -53,16 +81,13 @@ Use the `validateData()` function to check if your dataframe meet all the requir
 
 ```{r,error=TRUE,collapse=TRUE}
 # check if the dataframe "aneuploidy" is valid for MADSEQ analysis
-library("MADSEQ")
-# load the sample data aneuploidyChrom, the data set includes the dataframe for heterozygous sites
-# read depth for each site and average depth for the whole genome
-data(aneuploidyChrom)
+validateData(aneuploidyChrom)
+
 
 # load the sample data invalid
 data(invalid)
 
-validateData(aneuploidyChrom)
-
+# check if the dataframe "invalid" is valid for MADSEQ analysis
 validateData(invalid)
 
 ```
