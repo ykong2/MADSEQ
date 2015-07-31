@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0121)file://localhost/var/folders/8n/0w1ljqxd4wn01mg1gf83mzqw0000gv/T/RtmpIbo00p/preview-16f26f460863.dir/MADSEQ-vignette.html -->
+<!-- saved from url=(0121)file://localhost/var/folders/8n/0w1ljqxd4wn01mg1gf83mzqw0000gv/T/Rtmp9ofewT/preview-496e14c3aafd.dir/MADSEQ-vignette.html -->
 <html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta charset="utf-8">
@@ -7,7 +7,7 @@
 <meta name="generator" content="pandoc">
 
 
-<meta name="date" content="2015-07-30">
+<meta name="date" content="2015-07-31">
 
 <title>R Package MADSEQ</title>
 
@@ -130,7 +130,7 @@ code > span.er { color: #ff0000; font-weight: bold; }
 
 <div id="header">
 <h1 class="title">R Package MADSEQ</h1>
-<h4 class="date"><em>2015-07-30</em></h4>
+<h4 class="date"><em>2015-07-31</em></h4>
 </div>
 
 
@@ -164,22 +164,57 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <li><p>A numeric vector contains the read depth for all the sites from the same chromosome, and a numeric number contains the average coverage for the whole genome.</p></li>
 </ol>
 <p><strong>Note</strong>: sometimes the sequencing data can be noisy, you may need to filter/process your data before the application of MADSEQ models. The coverage of sequencing data usually is biased because of GC content, you may need to normalize your read depth by GC content. If you have a large sample size, you can quantile normalize the read depth as well.</p>
+<div id="example-data" class="section level3">
+<h3>Example Data</h3>
+<p>There are two sets of example data come with the package, the one named “aneuploidyChrom” is the data for a chromosome with aneuploidy, the data named “normalChrom” is the data for a normla chromosome.</p>
+<p><strong>Note</strong>: Your data should at least have the fields showed in the example data.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load the package</span>
+<span class="kw">library</span>(<span class="st">"MADSEQ"</span>)
+<span class="co"># To load the aneuploidy data</span>
+<span class="kw">data</span>(aneuploidyChrom)
+<span class="co"># There is one dataframe with the heterozygous sites, one vector with coverage, </span>
+<span class="co"># and a number with coverage for the whole genome</span>
+<span class="co"># Check the data</span>
+<span class="kw">head</span>(aneuploidyChrom)
+##     chr position Ref_D Alt_D
+## 1 chr18 55375653   110    36
+## 2 chr18 24490886   116    22
+## 3 chr18 47161628    86    84
+## 4 chr18 28087698    64    39
+## 5 chr18 49885137   177    72
+## 6 chr18 53971903    59   129
+<span class="kw">head</span>(aneuploidy_coverage)
+## [1] 235 122 145 126 177 159
+genome_coverage
+## [1] 130
+
+<span class="co"># To load the normal data</span>
+<span class="kw">data</span>(normalChrom)
+<span class="co"># To check the data</span>
+<span class="kw">head</span>(normalChrom)
+##     chr position Ref_D Alt_D
+## 1 chr15 61676140    70    66
+## 2 chr15 92641924    98    90
+## 3 chr15 69502443    64    53
+## 4 chr15 55131179    68    53
+## 5 chr15 80450389    45    55
+## 6 chr15 67479051    74    80
+<span class="kw">head</span>(normal_coverage)
+## [1] 117 169  75 106 112  64</code></pre>
+</div>
 <div id="check-if-your-dataframe-meet-the-requirements" class="section level3">
 <h3>check if your dataframe meet the requirements:</h3>
 <p><strong>Note</strong>: the following example use the example data comes with the package. To load the data use function <code>data(aneuploidyChrom)</code>. To get help with the example data by <code>?aneuploidyChrom</code>.</p>
 <p>Use the <code>validateData()</code> function to check if your dataframe meet all the requirements and could be taken as the input for further analysis by MADSEQ. If the dataframe meets the requirements, it will return TRUE. If it doesn’t meet the requirement, it will give an error explaining why it fails.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># check if the dataframe "aneuploidy" is valid for MADSEQ analysis</span>
-<span class="kw">library</span>(<span class="st">"MADSEQ"</span>)
-<span class="co"># load the sample data aneuploidyChrom, the data set includes the dataframe for heterozygous sites</span>
-<span class="co"># read depth for each site and average depth for the whole genome</span>
-<span class="kw">data</span>(aneuploidyChrom)
+<span class="kw">validateData</span>(aneuploidyChrom)
+## [1] TRUE
+
 
 <span class="co"># load the sample data invalid</span>
 <span class="kw">data</span>(invalid)
 
-<span class="kw">validateData</span>(aneuploidyChrom)
-## [1] TRUE
-
+<span class="co"># check if the dataframe "invalid" is valid for MADSEQ analysis</span>
 <span class="kw">validateData</span>(invalid)
 ## Error in validateData(invalid): the site in the 100 row is not biallelic, please check your data</code></pre>
 </div>
