@@ -119,12 +119,13 @@ abline(h=mean(aneuploidyChrom$Alt_D/(aneuploidyChrom$Alt_D+aneuploidyChrom$Ref_D
 print(normal)
 ## Posterior Distribution for Parameters
 ##          mean        95% HDI
-## kappa   6.930   [5.58, 8.32]
-## mu      0.464 [0.464, 0.464]
-## m_cov 130.000     [130, 130]
+## kappa 6.93000   [5.61, 8.29]
+## mu    0.46400 [0.464, 0.464]
+## p1    0.99200      [0.98, 1]
+## p2    0.00835      [0, 0.02]
 ## 
 ## BIC
-## [1] 4388.487
+## [1] 4408.715
 # you can check the full description of each parameters at the end of this page.
 ```
 
@@ -138,16 +139,19 @@ monosomy = runModelMonosomy(data=aneuploidyChrom, data_coverage = aneuploidy_cov
 print(monosomy)
 ## Posterior Distribution for Parameters
 ##           mean             95% HDI
-## f     1.23e-02    [7.1e-07, 0.036]
-## kappa 6.92e+00        [5.59, 8.31]
-## mu[1] 4.67e-01      [0.464, 0.473]
-## mu[2] 4.61e-01      [0.455, 0.464]
-## d1    3.11e-03 [1.77e-07, 0.00913]
-## d2    3.10e-03 [1.77e-07, 0.00911]
-## m_cov 1.29e+02          [128, 130]
+## f       0.0119  [4.24e-07, 0.0349]
+## kappa   6.9100        [5.57, 8.24]
+## mu[1]   0.4670      [0.464, 0.473]
+## mu[2]   0.4610      [0.455, 0.464]
+## d1      0.0030 [1.06e-07, 0.00885]
+## d2      0.0030 [1.06e-07, 0.00883]
+## m_cov 129.0000          [128, 130]
+## p1      0.4960       [0.43, 0.565]
+## p2      0.4950       [0.43, 0.565]
+## p3      0.0081           [0, 0.02]
 ## 
 ## BIC
-## [1] 4400.909
+# [1] 4433.375
 ```
 
 3. Use the **mosaic mitotic trisomy** model to fit the data
@@ -161,16 +165,19 @@ mitotic_trisomy = runModelTrisomy(data=aneuploidyChrom, data_coverage = aneuploi
 print(mitotic_trisomy)
 ## Posterior Distribution for Parameters
 ##           mean         95% HDI
-## f       0.3970  [0.242, 0.567]
-## kappa   9.1400    [6.46, 12.3]
-## mu[1]   0.5470  [0.518, 0.576]
-## mu[2]   0.3830   [0.355, 0.41]
-## d1      0.0828 [0.0546, 0.112]
-## d2      0.0808 [0.0537, 0.108]
-## m_cov 156.0000      [146, 167]
+## f       0.3950  [0.235, 0.554]
+## kappa   9.1100     [6.5, 12.2]
+## mu[1]   0.5460  [0.517, 0.574]
+## mu[2]   0.3830  [0.357, 0.412]
+## d1      0.0826   [0.053, 0.11]
+## d2      0.0806 [0.0522, 0.107]
+## m_cov 156.0000      [145, 166]
+## p1      0.4920    [0.43, 0.55]
+## p2      0.5000  [0.445, 0.565]
+## p3      0.0080       [0, 0.02]
 ## 
 ## BIC
-## [1] 4371.348
+# [1] 4403.88
 ```
 
 4. Use the **mosaic meiotic trisomy** model to fit the data
@@ -183,26 +190,26 @@ meiotic_trisomy = runModelFour(data=aneuploidyChrom, data_coverage = aneuploidy_
 
 print(meiotic_trisomy)
 ## Posterior Distribution for Parameters
-##          mean        95% HDI
-## f       0.538 [0.498, 0.579]
-## p[1]    0.356   [0.32, 0.39]
-## p[2]    0.356   [0.32, 0.39]
-## p[3]    0.139 [0.105, 0.175]
-## p[4]    0.139 [0.105, 0.175]
-## p[5]    0.010   [0.01, 0.01]
-## kappa 102.000      [60, 144]
-## mu[1]   0.571 [0.564, 0.577]
-## mu[2]   0.360 [0.354, 0.366]
-## mu[3]   0.189   [0.177, 0.2]
-## mu[4]   0.763 [0.749, 0.777]
-## d1      0.107 [0.101, 0.113]
-## d2      0.104 [0.0977, 0.11]
-## d3      0.189   [0.177, 0.2]
-## d4      0.237 [0.223, 0.251]
-## m_cov 165.000     [162, 168]
+##           mean        95% HDI
+## f     5.41e-01 [0.498, 0.579]
+## p1    3.13e-01  [0.285, 0.34]
+## p2    3.90e-01 [0.355, 0.415]
+## p3    1.38e-01   [0.12, 0.16]
+## p4    1.51e-01 [0.135, 0.175]
+## p5    7.33e-03      [0, 0.02]
+## kappa 1.04e+02    [63.2, 147]
+## mu[1] 5.71e-01 [0.564, 0.577]
+## mu[2] 3.60e-01 [0.354, 0.366]
+## mu[3] 1.89e-01   [0.177, 0.2]
+## mu[4] 7.62e-01 [0.749, 0.777]
+## d1    1.07e-01 [0.101, 0.113]
+## d2    1.04e-01 [0.0977, 0.11]
+## d3    1.89e-01   [0.177, 0.2]
+## d4    2.38e-01 [0.223, 0.251]
+## m_cov 1.65e+02     [162, 168]
 ## 
 ## BIC
-## [1] 4296.878
+## [1] 4335.426
 ```
 
 
@@ -214,11 +221,11 @@ After fit the data with all the models, next step is comparison of the goodness 
 best_model = modelSelection(normal, monosomy, mitotic_trisomy, meiotic_trisomy)
 ## Order of the preference of models
 ##     four  trisomy      one monosomy 
-## 4296.408 4371.318 4388.490 4400.791 
+## 4335.426 4403.880 4408.715 4433.375  
 ## 
 ## Best Model
 ##     four 
-## 4296.408 
+## 4335.426 
 
 best_model
 ## [1] "four"
@@ -226,8 +233,8 @@ best_model
 deltaBIC = modelComparison(normal, monosomy, mitotic_trisomy, meiotic_trisomy)
 
 deltaBIC
-##    four   trisomy       one   monosomy 
-## 0.00000  74.91026  92.08182  104.38283 
+##    four   trisomy     one  monosomy 
+## 0.00000 68.45383 73.28853  97.94909 
 
 ```
 
@@ -275,46 +282,46 @@ The `print()` function for MadSeqOutput class will print out the mean and 95% hi
 ```{r,eval=FALSE}
 print(meiotic_trisomy)
 ## Posterior Distribution for Parameters
-##          mean        95% HDI
-## f       0.538 [0.498, 0.579]
-## p[1]    0.356   [0.32, 0.39]
-## p[2]    0.356   [0.32, 0.39]
-## p[3]    0.139 [0.105, 0.175]
-## p[4]    0.139 [0.105, 0.175]
-## p[5]    0.010   [0.01, 0.01]
-## kappa 102.000      [60, 144]
-## mu[1]   0.571 [0.564, 0.577]
-## mu[2]   0.360 [0.354, 0.366]
-## mu[3]   0.189   [0.177, 0.2]
-## mu[4]   0.763 [0.749, 0.777]
-## d1      0.107 [0.101, 0.113]
-## d2      0.104 [0.0977, 0.11]
-## d3      0.189   [0.177, 0.2]
-## d4      0.237 [0.223, 0.251]
-## m_cov 165.000     [162, 168]
+##           mean        95% HDI
+## f     5.41e-01 [0.498, 0.579]
+## p1    3.13e-01  [0.285, 0.34]
+## p2    3.90e-01 [0.355, 0.415]
+## p3    1.38e-01   [0.12, 0.16]
+## p4    1.51e-01 [0.135, 0.175]
+## p5    7.33e-03      [0, 0.02]
+## kappa 1.04e+02    [63.2, 147]
+## mu[1] 5.71e-01 [0.564, 0.577]
+## mu[2] 3.60e-01 [0.354, 0.366]
+## mu[3] 1.89e-01   [0.177, 0.2]
+## mu[4] 7.62e-01 [0.749, 0.777]
+## d1    1.07e-01 [0.101, 0.113]
+## d2    1.04e-01 [0.0977, 0.11]
+## d3    1.89e-01   [0.177, 0.2]
+## d4    2.38e-01 [0.223, 0.251]
+## m_cov 1.65e+02     [162, 168]
 ## 
 ## BIC
-## [1] 4296.878
+## [1] 4335.426
 ```
 
 The `summary()` function for MadSeqOutput class will produce the quantiles of the parameters from the posterior distribution.
 
 ```{r,eval=FALSE}
 summary(meiotic_trisomy)
-##        f               p[1]             p[2]             p[3]              p[4]         
-##  Min.   :0.4649   Min.   :0.2849   Min.   :0.2849   Min.   :0.07397   Min.   :0.07397 
-##  1st Qu.:0.5233   1st Qu.:0.3436   1st Qu.:0.3436   1st Qu.:0.12697   1st Qu.:0.12697    
-##  Median :0.5370   Median :0.3559   Median :0.3559   Median :0.13905   Median :0.13905  
-##  Mean   :0.5375   Mean   :0.3556   Mean   :0.3556   Mean   :0.13936   Mean   :0.13936    
-##  3rd Qu.:0.5513   3rd Qu.:0.3680   3rd Qu.:0.3680   3rd Qu.:0.15140   3rd Qu.:0.15140    
-##  Max.   :0.6163   Max.   :0.4210   Max.   :0.4210   Max.   :0.21010   Max.   :0.21010     
-##      kappa            mu[1]            mu[2]            mu[3]            mu[4]           
-##  Min.   : 37.28   Min.   :0.5589   Min.   :0.3486   Min.   :0.1674   Min.   :0.7373     
-##  1st Qu.: 86.92   1st Qu.:0.5685   1st Qu.:0.3580   1st Qu.:0.1846   1st Qu.:0.7584  
-##  Median :100.58   Median :0.5707   Median :0.3601   Median :0.1885   Median :0.7631    
-##  Mean   :101.99   Mean   :0.5708   Mean   :0.3601   Mean   :0.1886   Mean   :0.7630    
-##  3rd Qu.:115.53   3rd Qu.:0.5730   3rd Qu.:0.3622   3rd Qu.:0.1925   3rd Qu.:0.7678   
-##  Max.   :198.72   Max.   :0.5830   Max.   :0.3713   Max.   :0.2105   Max.   :0.7882  
+##        f                p1               p2               p3               p4                    
+##  Min.   :0.4624   Min.   :0.2500   Min.   :0.3250   Min.   :0.0900   Min.   :0.1000    
+##  1st Qu.:0.5265   1st Qu.:0.3050   1st Qu.:0.3800   1st Qu.:0.1300   1st Qu.:0.1450   
+##  Median :0.5403   Median :0.3150   Median :0.3900   Median :0.1400   Median :0.1500     
+##  Mean   :0.5406   Mean   :0.3133   Mean   :0.3901   Mean   :0.1384   Mean   :0.1509   
+##  3rd Qu.:0.5544   3rd Qu.:0.3250   3rd Qu.:0.4000   3rd Qu.:0.1450   3rd Qu.:0.1600  
+##  Max.   :0.6367   Max.   :0.3800   Max.   :0.4550   Max.   :0.1950   Max.   :0.2050     
+##      kappa            mu[1]            mu[2]            mu[3]            mu[4]                  
+##  Min.   : 33.73   Min.   :0.5585   Min.   :0.3458   Min.   :0.1667   Min.   :0.7310     
+##  1st Qu.: 88.30   1st Qu.:0.5691   1st Qu.:0.3575   1st Qu.:0.1855   1st Qu.:0.7573    
+##  Median :102.20   Median :0.5713   Median :0.3596   Median :0.1894   Median :0.7620  
+##  Mean   :103.57   Mean   :0.5713   Mean   :0.3596   Mean   :0.1895   Mean   :0.7620    
+##  3rd Qu.:117.11   3rd Qu.:0.5735   3rd Qu.:0.3617   3rd Qu.:0.1934   3rd Qu.:0.7667    
+##  Max.   :215.28   Max.   :0.5861   Max.   :0.3717   Max.   :0.2159   Max.   :0.7891   
 #.......
 ```
 
@@ -343,9 +350,9 @@ plotMixture(meiotic_trisomy)
 
 ## Description of All Parameters
 ```{r,echo=FALSE,warning=FALSE}
-parameters = c("f","m","mu[1]","mu[2]","mu[3]","mu[4]","kappa","p[1]","p[2]","p[3]","p[4]","p[5]","d1","d2"     
+parameters = c("f","m","mu[1]","mu[2]","mu[3]","mu[4]","kappa","p1","p2","p3","p4","p5","d1","d2"     
                ,"d3","d4","m_cov","p_cov","r_cov")
-explains = c("Fraction of mosaic aneuploidy","The midpoint","Mean of mixture 1: the AAFs of this mixture shifted from midpoint to some higher values", "Mean of mixture 2: the AAFs of this mixture shifted from midpoint to some lower values","Mean of mixture 3: the AAFs of this mixture shifted from 0 to some higher value (only in meiotic model)","Mean of mixture 4: the AAFs of this mixture shifted from 1 to some lower value (only in meiotic model)","Indicate variance of the AAF mixtures: larger kappa means smaller variance","Weight of mixture 1 (=p[2]): indicate the proportion of heterozygous sites in the mixture 1","Weight of mixture 2 (=p[1]): indicate the proportion of heterozygous sites in the mixture 2","Weight of mixture 3 (=p[4]): indicate the proportion of heterozygous sites in the mixture 3 (only in meiotic model)","Weight of mixture 4 (=p[3]): indicate the proportion of heterozygous sites in the mixture 4 (only in meiotic model)","Weight of outlier component (=0.01): the AAF of 1% sites might not well behaved, so these sites are treated as noise.","Distance that mixture 1 shifted from the midpoint","Distance that mixture 2 shifted from the midpoint","Distance that mixture 3 shifted from 0 (only in meiotic model)","Distance that mixture 4 shifted from 1 (only in meiotic model)","Mean coverage of all the sites from the chromosome, estimated from a negative binomial distribution","Prob of the negative binomial distribution for the coverage","Another parameter (r) for the negative binomial disbribution, small r means large variance")
+explains = c("Fraction of mosaic aneuploidy","The midpoint","Mean of mixture 1: the AAFs of this mixture shifted from midpoint to some higher values", "Mean of mixture 2: the AAFs of this mixture shifted from midpoint to some lower values","Mean of mixture 3: the AAFs of this mixture shifted from 0 to some higher value (only in meiotic model)","Mean of mixture 4: the AAFs of this mixture shifted from 1 to some lower value (only in meiotic model)","Indicate variance of the AAF mixtures: larger kappa means smaller variance","Weight of mixture 1: indicate the proportion of heterozygous sites in the mixture 1","Weight of mixture 2: indicate the proportion of heterozygous sites in the mixture 2","Weight of mixture 3: indicate the proportion of heterozygous sites in the mixture 3 (only in meiotic model)","Weight of mixture 4: indicate the proportion of heterozygous sites in the mixture 4 (only in meiotic model)","Weight of outlier component: the AAF of 1% sites might not well behaved, so these sites are treated as noise.","Distance that mixture 1 shifted from the midpoint","Distance that mixture 2 shifted from the midpoint","Distance that mixture 3 shifted from 0 (only in meiotic model)","Distance that mixture 4 shifted from 1 (only in meiotic model)","Mean coverage of all the sites from the chromosome, estimated from a negative binomial distribution","Prob of the negative binomial distribution for the coverage","Another parameter (r) for the negative binomial disbribution, small r means large variance")
 table = data.frame(parameters,explains)
 kable(table,col.names =c("parameters","description") ,align="c")
 ```

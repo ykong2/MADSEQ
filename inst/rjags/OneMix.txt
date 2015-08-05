@@ -24,4 +24,6 @@ a[2] <- 1
 b[2] <- 1
 p[1] <- 0.99
 p[2] <- 0.01
+p1 <- sum(mixture[1:nSNP]==1)/nSNP
+p2 <- sum(mixture[1:nSNP]==2)/nSNP
 }

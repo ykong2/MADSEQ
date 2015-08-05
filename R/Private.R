@@ -128,89 +128,12 @@ calculateBIC1 = function(post,theta,datalist){
   kappa = post["kappa"]
   a = mu*kappa
   b = (1-mu)*kappa
+  p1 = post["p1"]
+  p2 = post["p2"]
   
   log.aaf = 0
   for (i in 1:length(theta)){
-    p_theta = 0.99*dbeta(theta[i],a,b)+0.01*dbeta(theta[i],1,1)
-    log.like.aaf = log(p_theta*dbinom(z[i],N[i],prob=theta[i]))
-    log.aaf = log.aaf+log.like.aaf
-  }
-  # print(unname(log.aaf))
-  # the log likelihood for coverage
-  N_cov = datalist$N_cov
-  r_cov = post["r_cov"]
-  p_cov = post["p_cov"]
-  log.cov = 0
-  for (i in 1:length(N_cov)){
-    log.like.cov = log(dnbinom(N_cov[i],size=r_cov,prob=p_cov))
-    log.cov = log.cov + log.like.cov
-  }
-  # print(log.cov)
-  log.sum = log.aaf+log.cov
-  deviance = -2*log.sum
-  
-  # calculate BIC
-  # datapoint
-  datapoint = datalist$nSites + sum(datalist$N)
-  BIC = 1*log(datapoint)+deviance
-  return(BIC)
-}
-
-# calculate the BIC value for two mixture model
-calculateBIC2 = function(post,theta,datalist){
-  N = datalist$N
-  z = datalist$z
-  a1 = post["mu[1]"]*post["kappa"]
-  b1 = (1-post["mu[1]"])*post["kappa"]
-  a2 = post["mu[2]"]*post["kappa"]
-  b2 = (1-post["mu[2]"])*post["kappa"]
-  
-  log.aaf = 0
-  for (i in 1:length(theta)){
-    p_theta = 0.495*dbeta(theta[i],a1,b1)+0.495*dbeta(theta[i],a2,b2)+0.01*dbeta(theta[i],1,1)
-    log.like.aaf = log(p_theta*dbinom(z[i],N[i],prob=theta[i]))
-    log.aaf = log.aaf+log.like.aaf
-  }
-  # print(unname(log.aaf))
-  # the log likelihood for coverage
-  N_cov = datalist$N_cov
-  r_cov = post["r_cov"]
-  p_cov = post["p_cov"]
-  log.cov = 0
-  for (i in 1:length(N_cov)){
-    log.like.cov = log(dnbinom(N_cov[i],size=r_cov,prob=p_cov))
-    log.cov = log.cov + log.like.cov
-  }
-  # print(log.cov)
-  log.sum = log.aaf+log.cov
-  deviance = -2*log.sum
-  
-  # calculate BIC
-  # datapoint
-  datapoint = datalist$nSites + sum(datalist$N)
-  BIC = 2*log(datapoint)+deviance
-  return(BIC)
-}
-
-# calculate the BIC value for four mixture model
-calculateBIC4 = function(post,theta,datalist){
-  N = datalist$N
-  z = datalist$z
-  a1 = post["mu[1]"]*post["kappa"]
-  b1 = (1-post["mu[1]"])*post["kappa"]
-  a2 = post["mu[2]"]*post["kappa"]
-  b2 = (1-post["mu[2]"])*post["kappa"]
-  a3 = post["mu[3]"]*post["kappa"]
-  b3 = (1-post["mu[3]"])*post["kappa"]
-  a4 = post["mu[4]"]*post["kappa"]
-  b4 = (1-post["mu[4]"])*post["kappa"]
-  p1 = post["p[1]"]
-  p2 = post["p[2]"]
-  p3 = post["p[3]"]
-  p4 = post["p[4]"]
-  log.aaf = 0
-  for (i in 1:length(theta)){
-    p_theta = p1*dbeta(theta[i],a1,b1)+p2*dbeta(theta[i],a2,b2)+p3*dbeta(theta[i],a3,b3)+p4*dbeta(theta[i],a4,b4)+0.01*dbeta(theta[i],1,1)
+    p_theta = p1*dbeta(theta[i],a,b)+p2*dbeta(theta[i],1,1)
     log.like.aaf = log(p_theta*dbinom(z[i],N[i],prob=theta[i]))
     log.aaf = log.aaf+log.like.aaf
   }
@@ -232,6 +155,90 @@ calculateBIC4 = function(post,theta,datalist){
   # datapoint
   datapoint = datalist$nSites + sum(datalist$N)
   BIC = 3*log(datapoint)+deviance
+  return(BIC)
+}
+
+# calculate the BIC value for two mixture model
+calculateBIC2 = function(post,theta,datalist){
+  N = datalist$N
+  z = datalist$z
+  a1 = post["mu[1]"]*post["kappa"]
+  b1 = (1-post["mu[1]"])*post["kappa"]
+  a2 = post["mu[2]"]*post["kappa"]
+  b2 = (1-post["mu[2]"])*post["kappa"]
+  p1 = post["p1"]
+  p2 = post["p2"]
+  p3 = post["p3"]
+  
+  log.aaf = 0
+  for (i in 1:length(theta)){
+    p_theta = p1*dbeta(theta[i],a1,b1)+p2*dbeta(theta[i],a2,b2)+p3*dbeta(theta[i],1,1)
+    log.like.aaf = log(p_theta*dbinom(z[i],N[i],prob=theta[i]))
+    log.aaf = log.aaf+log.like.aaf
+  }
+  # print(unname(log.aaf))
+  # the log likelihood for coverage
+  N_cov = datalist$N_cov
+  r_cov = post["r_cov"]
+  p_cov = post["p_cov"]
+  log.cov = 0
+  for (i in 1:length(N_cov)){
+    log.like.cov = log(dnbinom(N_cov[i],size=r_cov,prob=p_cov))
+    log.cov = log.cov + log.like.cov
+  }
+  # print(log.cov)
+  log.sum = log.aaf+log.cov
+  deviance = -2*log.sum
+  
+  # calculate BIC
+  # datapoint
+  datapoint = datalist$nSites + sum(datalist$N)
+  BIC = 5*log(datapoint)+deviance
+  return(BIC)
+}
+
+# calculate the BIC value for four mixture model
+calculateBIC4 = function(post,theta,datalist){
+  N = datalist$N
+  z = datalist$z
+  a1 = post["mu[1]"]*post["kappa"]
+  b1 = (1-post["mu[1]"])*post["kappa"]
+  a2 = post["mu[2]"]*post["kappa"]
+  b2 = (1-post["mu[2]"])*post["kappa"]
+  a3 = post["mu[3]"]*post["kappa"]
+  b3 = (1-post["mu[3]"])*post["kappa"]
+  a4 = post["mu[4]"]*post["kappa"]
+  b4 = (1-post["mu[4]"])*post["kappa"]
+  p1 = post["p1"]
+  p2 = post["p2"]
+  p3 = post["p3"]
+  p4 = post["p4"]
+  p5 = post["p5"]
+  
+  log.aaf = 0
+  for (i in 1:length(theta)){
+    p_theta = p1*dbeta(theta[i],a1,b1)+p2*dbeta(theta[i],a2,b2)+p3*dbeta(theta[i],a3,b3)+p4*dbeta(theta[i],a4,b4)+p5*dbeta(theta[i],1,1)
+    log.like.aaf = log(p_theta*dbinom(z[i],N[i],prob=theta[i]))
+    log.aaf = log.aaf+log.like.aaf
+  }
+  # print(unname(log.aaf))
+  # the log likelihood for coverage
+  N_cov = datalist$N_cov
+  r_cov = post["r_cov"]
+  p_cov = post["p_cov"]
+  log.cov = 0
+  for (i in 1:length(N_cov)){
+    log.like.cov = log(dnbinom(N_cov[i],size=r_cov,prob=p_cov))
+    log.cov = log.cov + log.like.cov
+  }
+  # print(log.cov)
+  log.sum = log.aaf+log.cov
+  deviance = -2*log.sum
+  
+  # calculate BIC
+  # datapoint
+  datapoint = datalist$nSites + sum(datalist$N)
+  BIC = 7*log(datapoint)+deviance
   return(BIC)
 }
 

@@ -73,8 +73,8 @@ runModelOne = function(data,data_coverage,control_coverage,adapt=10000,burnin=10
   numSavedSteps=nStep          # Total number of steps in chains to save.
   thinSteps=thinSteps                  # Number of steps to "thin" (1=keep every step).
   nIter = ceiling( ( numSavedSteps * thinSteps ) / nChains )
-  parameters_one = c("kappa","p_cov","r_cov","theta","mu","m_cov")
-  record_one = c("kappa","p_cov","r_cov","mu","m_cov")
+  parameters_one = c("kappa","p_cov","r_cov","theta","mu","p1","p2")
+  record_one = c("kappa","p_cov","r_cov","mu","p1","p2")
   
   # generate dataList for the MCMC
   dataList = creatDataList_One(data=data,N1=control_coverage,N2=data_coverage,plot=plot)
@@ -133,8 +133,8 @@ runModelMonosomy = function(data,data_coverage,control_coverage,adapt=10000,burn
   numSavedSteps=nStep          # Total number of steps in chains to save.
   thinSteps=thinSteps                  # Number of steps to "thin" (1=keep every step).
   nIter = ceiling( ( numSavedSteps * thinSteps ) / nChains )
-  parameters_two = c("p_cov","m_cov","r_cov","mu","kappa","d1","d2","f","theta")
-  record_two = c("f","kappa","mu[1]","mu[2]","d1","d2","p_cov","r_cov","m_cov")
+  parameters_two = c("p_cov","m_cov","r_cov","mu","kappa","d1","d2","f","theta","p1","p2","p3")
+  record_two = c("f","kappa","mu[1]","mu[2]","d1","d2","p_cov","r_cov","m_cov","p1","p2","p3")
   
   # generate dataList for the MCMC
   dataList = creatDataList_Two(data=data,N1=control_coverage,N2=data_coverage,plot=plot)
@@ -194,8 +194,8 @@ runModelTrisomy = function(data,data_coverage,control_coverage,adapt=10000,burni
   numSavedSteps=nStep          # Total number of steps in chains to save.
   thinSteps=thinSteps                  # Number of steps to "thin" (1=keep every step).
   nIter = ceiling( ( numSavedSteps * thinSteps ) / nChains )
-  parameters_two = c("p_cov","m_cov","r_cov","mu","kappa","d1","d2","f","theta")
-  record_two = c("f","kappa","mu[1]","mu[2]","d1","d2","p_cov","r_cov","m_cov")
+  parameters_two = c("p_cov","m_cov","r_cov","mu","kappa","d1","d2","f","theta","p1","p2","p3")
+  record_two = c("f","kappa","mu[1]","mu[2]","d1","d2","p_cov","r_cov","m_cov","p1","p2","p3")
   
   # generate dataList for the MCMC
   dataList = creatDataList_Two(data=data,N1=control_coverage,N2=data_coverage,plot=plot)
@@ -255,8 +255,8 @@ runModelFour = function(data,data_coverage,control_coverage,adapt=10000,burnin=1
   numSavedSteps=nStep          # Total number of steps in chains to save.
   thinSteps=thinSteps                  # Number of steps to "thin" (1=keep every step).
   nIter = ceiling( ( numSavedSteps * thinSteps ) / nChains )
-  parameters_four = c("p_cov","m_cov","r_cov","mu","kappa","d1","d2","d3","d4","p","f","theta")
-  record_four = c("f","p[1]","p[2]","p[3]","p[4]","p[5]","kappa","mu[1]","mu[2]","mu[3]","mu[4]","d1","d2","d3","d4","p_cov","r_cov","m_cov")
+  parameters_four = c("p_cov","m_cov","r_cov","mu","kappa","d1","d2","d3","d4","p1","p2","p3","p4","p5","f","theta")
+  record_four = c("f","p1","p2","p3","p4","p5","kappa","mu[1]","mu[2]","mu[3]","mu[4]","d1","d2","d3","d4","p_cov","r_cov","m_cov")
   
   # generate dataList for the MCMC
   dataList = creatDataList_Four(data=data,N1=control_coverage,N2=data_coverage,plot=plot)
@@ -380,6 +380,10 @@ plotPosterior = function(object,variable="all"){
       if (min(tmp_dat)==max(tmp_dat)){
         hist(tmp_dat,prob=TRUE,main=paste("posterior density of",i),xlab="")
       }
+      else if (i=="p1"|i=="p2"|i=="p3"|i=="p4"|i=="p5"){
+        par(lwd=2)
+        hist(tmp_dat,prob=TRUE,main=paste("posterior density of",i),xlab="",border="blue")
+      }
       else{
         plot(density(tmp_dat),xlab="",lwd=2,col="blue",main=paste("posterior density of",i))
       }
@@ -448,10 +452,12 @@ plotMixture = function(object,labels=TRUE){
   if(is.element("mu",data_variables)){
     a = data_median["mu"]*data_median["kappa"]
     b = (1-data_median["mu"])*data_median["kappa"]
+    p1 = data_median["p1"]
+    p2 = data_median["p2"]
     y_max = max(dbeta(seq(0,1,0.01),a,b))
     mu = signif(a/(a+b),2)
-    curve(0.99*dbeta(x,a,b),col="blue",lwd=3,xlab="alternative allele frequency",ylab="density",main="posterior distribution of mixtures",mgp=c(2,1,0),ylim=c(0,1.1*y_max),bty="l")
-    curve(0.01*dbeta(x,1,1),col="grey4",lwd=2,lty=2,add=TRUE)
+    curve(p1*dbeta(x,a,b),col="blue",lwd=3,xlab="alternative allele frequency",ylab="density",main="posterior distribution of mixtures",mgp=c(2,1,0),ylim=c(0,1.1*y_max),bty="l")
+    curve(p2*dbeta(x,1,1),col="grey4",lwd=2,lty=2,add=TRUE)
     if(labels==TRUE){
       text(x= mu,1.05*y_max,paste("m =",as.character(mu)))
     }
@@ -469,11 +475,11 @@ plotMixture = function(object,labels=TRUE){
     b4 = (1-data_median["mu[4]"])*data_median["kappa"]
     a5 = 1
     b5 = 1
-    p1 = data_median["p[1]"]
-    p2 = data_median["p[2]"]
-    p3 = data_median["p[3]"]
-    p4 = data_median["p[4]"]
-    p5 = 0.01
+    p1 = data_median["p1"]
+    p2 = data_median["p2"]
+    p3 = data_median["p3"]
+    p4 = data_median["p4"]
+    p5 = data_median["p5"]
     
     m1 = signif(a1/(a1+b1),2)
     m2 = signif(a2/(a2+b2),2)
@@ -481,7 +487,7 @@ plotMixture = function(object,labels=TRUE){
     m4 = signif(a4/(a4+b4),2)
     
     y_max = max(c(p1*dbeta(seq(0,1,0.01),a1,b1),p2*dbeta(seq(0,1,0.01),a2,b2),p3*dbeta(seq(0,1,0.01),a3,b3),p4*dbeta(seq(0,1,0.01),a4,b4),p5*dbeta(seq(0,1,0.01),a5,b5)))
-    
+    print(y_max)
     curve(p1*dbeta(x,a1,b1),col="blue",lwd=3,xlab="alternative allele frequency",ylab="density",main="posterior distribution of mixtures",mgp=c(2,1,0),xlim=c(0,1),bty="l",ylim=c(0,1.25*y_max))
     curve(p2*dbeta(x,a2,b2),col="blue",lwd=3,add=TRUE)
     curve(p3*dbeta(x,a3,b3),col="green4",lwd=3,add=TRUE)
@@ -505,9 +511,9 @@ plotMixture = function(object,labels=TRUE){
     a3 = 1
     b3 = 1
     
-    p1 = 0.495
-    p2 = 0.495
-    p3 = 0.01
+    p1 = data_median["p1"]
+    p2 = data_median["p2"]
+    p3 = data_median["p3"]
     
     m1 = signif(a1/(a1+b1),2)
     m2 = signif(a2/(a2+b2),2)
