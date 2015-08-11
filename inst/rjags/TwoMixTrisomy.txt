@@ -1,4 +1,3 @@
-
 model{
 for (i in 1:nSNP){
 # likelihood

@@ -125,7 +125,7 @@ print(normal)
 ## p2    0.00835      [0, 0.02]
 ## 
 ## BIC
-## [1] 4408.715
+## [1] 4388.47
 # you can check the full description of each parameters at the end of this page.
 ```
 
@@ -151,7 +151,7 @@ print(monosomy)
 ## p3      0.0081           [0, 0.02]
 ## 
 ## BIC
-# [1] 4433.375
+# [1] 4400.937
 ```
 
 3. Use the **mosaic mitotic trisomy** model to fit the data
@@ -177,7 +177,7 @@ print(mitotic_trisomy)
 ## p3      0.0080       [0, 0.02]
 ## 
 ## BIC
-# [1] 4403.88
+# [1] 4371.356
 ```
 
 4. Use the **mosaic meiotic trisomy** model to fit the data
@@ -209,7 +209,7 @@ print(meiotic_trisomy)
 ## m_cov 1.65e+02     [162, 168]
 ## 
 ## BIC
-## [1] 4335.426
+## [1] 4289.336
 ```
 
 
@@ -221,11 +221,11 @@ After fit the data with all the models, next step is comparison of the goodness 
 best_model = modelSelection(normal, monosomy, mitotic_trisomy, meiotic_trisomy)
 ## Order of the preference of models
 ##     four  trisomy      one monosomy 
-## 4335.426 4403.880 4408.715 4433.375  
+## 4289.336 4371.356 4388.470 4400.937  
 ## 
 ## Best Model
 ##     four 
-## 4335.426 
+## 4289.336 
 
 best_model
 ## [1] "four"
@@ -234,7 +234,7 @@ deltaBIC = modelComparison(normal, monosomy, mitotic_trisomy, meiotic_trisomy)
 
 deltaBIC
 ##    four   trisomy     one  monosomy 
-## 0.00000 68.45383 73.28853  97.94909 
+## 0.00000  82.01984  99.13448 111.60098 
 
 ```
 
@@ -301,7 +301,7 @@ print(meiotic_trisomy)
 ## m_cov 1.65e+02     [162, 168]
 ## 
 ## BIC
-## [1] 4335.426
+## [1] 4289.336
 ```
 
 The `summary()` function for MadSeqOutput class will produce the quantiles of the parameters from the posterior distribution.
