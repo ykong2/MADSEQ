@@ -151,7 +151,7 @@ print(monosomy)
 ## p3      0.0081           [0, 0.02]
 ## 
 ## BIC
-# [1] 4400.937
+## [1] 4400.937
 ```
 
 3. Use the **mosaic mitotic trisomy** model to fit the data
@@ -177,7 +177,7 @@ print(mitotic_trisomy)
 ## p3      0.0080       [0, 0.02]
 ## 
 ## BIC
-# [1] 4371.356
+## [1] 4371.356
 ```
 
 4. Use the **mosaic meiotic trisomy** model to fit the data
