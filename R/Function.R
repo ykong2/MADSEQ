@@ -358,12 +358,34 @@ modelComparison = function(object1,object2,...){
   return(deltaBIC)
 }
 
+# 7. function to do traceplot for the output of MCMC
+#' traceplot for MadSeqOutput
+#' 
+#' trace plot for all the parameters sampled by MCMC chain
+#' @param object Object of MadSeqOutput class, which is produced by one of the runModel functions
+#' @return traceplot for all the parameters sampled by this model
+#' @export
+tracePlot = function(object){
+  data = as.data.frame(object$posterior)
+  all_name = names(data)
+  datapoint = nrow(data)
+  par(mfrow=c(3,2))
+  par(mar=c(2.5,4,3,2))
+  for (i in all_name){
+    tmp_dat = data[,i]
+    if(i=="r_cov"|i=="m_cov"|i=="kappa")
+    plot(1:datapoint,tmp_dat,type="l",main=paste("traceplot of ",i,sep=""),ylab=NULL,xlab="step",col="blue",lwd=0.5)
+    else
+      plot(1:datapoint,tmp_dat,type="l",main=paste("traceplot of ",i,sep=""),ylim=c(0,1),ylab=NULL,xlab="step",col="blue",lwd=0.5)
+  }
+}
+
 #-------------------------3. Function to process output from Model-------------------
 # 1. plot the density plots for the posterior distribution
 #' Plot the posterior density estimates from runModel output
 #' 
 #' Display density plots of the posterior estimates of choosen variables, the density is produced by density function.
-#' @param object A MadSeqOutput object, which is produced by one of the runModel functions
+#' @param object Object of MadSeqOutput class, which is produced by one of the runModel functions
 #' @param variable A character vector indicates the posterior density of which variable to be plot. (default is plot all the variables)
 #' @export
 plotPosterior = function(object,variable="all"){
@@ -415,7 +437,7 @@ plotPosterior = function(object,variable="all"){
 #' 
 #' display the histogram of posterior distribution of the fraction of aneuploidy cells, with mean and HPD (highest posterior density) intervals indicated on the plot
 #' 
-#' @param object A MadSeqOutput object, which is produced by one of the runModel functions
+#' @param object Object of MadSeqOutput class, which is produced by one of the runModel functions
 #' @param prob A numeric number in the interval(0,1) giving the probability content of the intervals
 #' @export
 #' @seealso \code{\link{plotPosterior}} \code{\link{plotMixture}}
@@ -439,7 +461,7 @@ plotFraction = function(object,prob=0.95){
 #' plot the posterior estimates of mixture disbribution
 #' 
 #' display the posterior mixture disbribution of alternative allele frequencies, indicating the mean of each mixture
-#' @param object A MadSeqOutput object, which is produced by one of the runModel functions
+#' @param object Object of MadSeqOutput class, which is produced by one of the runModel functions
 #' @param labels logical; if TRUE, will label each mixture and give the mean value on the plot
 #' @export
 #' @seealso  \code{\link{plotPosterior}} \code{\link{plotFraction}}

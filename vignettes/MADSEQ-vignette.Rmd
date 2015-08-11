@@ -212,6 +212,7 @@ print(meiotic_trisomy)
 ## [1] 4289.336
 ```
 
+**Note:** Besides setting `checkConvergence=T` in `runModel()` function, you can also check the convergence of the MadSeqOutput by using `tracePlot(MadSeqOutput)` function.
 
 ## Model Comparison
 
