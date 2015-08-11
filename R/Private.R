@@ -128,8 +128,8 @@ calculateBIC1 = function(post,theta,datalist){
   kappa = post["kappa"]
   a = mu*kappa
   b = (1-mu)*kappa
-  p1 = post["p1"]
-  p2 = post["p2"]
+  p1 = 0.99
+  p2 = 0.01
   
   log.aaf = 0
   for (i in 1:length(theta)){
@@ -154,7 +154,7 @@ calculateBIC1 = function(post,theta,datalist){
   # calculate BIC
   # datapoint
   datapoint = datalist$nSites + sum(datalist$N)
-  BIC = 3*log(datapoint)+deviance
+  BIC = 1*log(datapoint)+deviance
   return(BIC)
 }
 
@@ -166,9 +166,9 @@ calculateBIC2 = function(post,theta,datalist){
   b1 = (1-post["mu[1]"])*post["kappa"]
   a2 = post["mu[2]"]*post["kappa"]
   b2 = (1-post["mu[2]"])*post["kappa"]
-  p1 = post["p1"]
-  p2 = post["p2"]
-  p3 = post["p3"]
+  p1 = 0.495
+  p2 = 0.495
+  p3 = 0.01
   
   log.aaf = 0
   for (i in 1:length(theta)){
@@ -193,7 +193,7 @@ calculateBIC2 = function(post,theta,datalist){
   # calculate BIC
   # datapoint
   datapoint = datalist$nSites + sum(datalist$N)
-  BIC = 5*log(datapoint)+deviance
+  BIC = 2*log(datapoint)+deviance
   return(BIC)
 }
 
@@ -209,11 +209,11 @@ calculateBIC4 = function(post,theta,datalist){
   b3 = (1-post["mu[3]"])*post["kappa"]
   a4 = post["mu[4]"]*post["kappa"]
   b4 = (1-post["mu[4]"])*post["kappa"]
-  p1 = post["p1"]
-  p2 = post["p2"]
-  p3 = post["p3"]
-  p4 = post["p4"]
-  p5 = post["p5"]
+  p1 = 0.33
+  p2 = 0.33
+  p3 = 0.165
+  p4 = 0.165
+  p5 = 0.01
   
   log.aaf = 0
   for (i in 1:length(theta)){
@@ -238,7 +238,7 @@ calculateBIC4 = function(post,theta,datalist){
   # calculate BIC
   # datapoint
   datapoint = datalist$nSites + sum(datalist$N)
-  BIC = 7*log(datapoint)+deviance
+  BIC = 2*log(datapoint)+deviance
   return(BIC)
 }
 
