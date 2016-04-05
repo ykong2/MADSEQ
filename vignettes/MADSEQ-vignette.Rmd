@@ -1,5 +1,6 @@
 ---
 title: "R Package MADSEQ"
+author: "Yu Kong"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -8,241 +9,267 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
-The MADSEQ package is a hierarchical Bayesian model for the detection and quantification of potential mosaic aneuploidy in sample using next generation sequencing data. 
+The MADSEQ package is a group of hierarchical Bayesian model for the detection 
+and quantification of potential mosaic aneuploidy in sample using massive
+parallel sequencing data. 
 
-The MADSEQ package takes two pieces of information for the detection and quantification of mosaic aneuploidy:
+The MADSEQ package takes two pieces of information for the detection and 
+quantification of mosaic aneuploidy:
 
-1. The distribution of the alternative allele frequencies (AAF) of the sites that are genotyped as heterozygous .
-1. The sequencing depth for each site (including all the sites with all the genotypes).
+1. The distribution of the alternative allele frequencies (AAF) of the sites 
+that are genotyped as heterozygous.
+1. The average sequencing coverage for regions. (for targeted sequencing it's 
+each targeted region; for whole genome sequencing, bin the genome into bins. And
+because sequencing coverage are usually biased by GC content, normalization is
+necessary, the normalization function is provided in the package).
 
-There are four different models in MADSEQ package, they are designed for different types of mosaic aneuploidy:
 
-* normal chromosome model
-* mosaic monosomy model
-* mosaic mitotic trisomy model
-* mosaic meiotic trisomy model
+MADSEQ works on the whole chromosome resolution. It applies all of the five models
+(normal, monosomy, mitotic trisomy, meiotic trisomy, loss of heterozygosity) to 
+fit the distribution of the AAF of all the heterozygous sites, and fit the 
+distribution of the coverage from that chromosome. After fitting the same data 
+using all models, it does model comparison using BIC (Bayesian Information 
+Criteria) to select the best model. The model selected tells us whether the 
+chromosome is aneuploid or not, and also the type of mosaic aneuploidy. 
+Then, from the posterior distribution of the best model, we could get the 
+estimation of the fraction of aneuploidy cells.
 
-MADSEQ works on the chromosome resolution. It applies all of the four models to fit the distribution of the alternative allele frequencies of the heterozygous sites, and fit the distribution of the sequence depth of all the sites from that chromosome. After fitting the same data using four models, it does model comparison using BIC (Bayesian Information Criteria) to select the best model. The model selected tells us whether the chromosome is aneuploid or not, and also the type of mosaic aneuploidy. Then, from the posterior distribution of the best model, we could get the estimation of the fraction of aneuploidy cells.
+## Data You Need
 
-## Data Preparation
+* A __bam__ file for your sample: sorted, indexed.
+* A __vcf.gz__ file for your sample: 
+    * The vcf should be bgzip compressed (bgzip 
+    is a part of tabix package, which can be download from 
+    [here](http://www.htslib.org/)). 
+    * The FORMAT section of the vcf file should contain depth (DP) and allelic 
+    depth (AD) field.
+* A __bed__ file containing targeted regions: if it's targeted sequencing data, then
+  the bed file contatining targeted regions; if it's whole genome sequencing, 
+  bin the whole genome into equal size bins (i.e. 500kb).
 
-Before applying MADSEQ to your data, you need to process your data first to meet the requirement of the MADSEQ package. Here describes how to prepare the data for MADSEQ package.
+**Note:** Currently our package only supports one bam and one vcf file per 
+sample. If you have more than one sample, please prepare multiple bam and vcf 
+files for each of them.
 
-1. A dataframe contains the heterozygous sites from the chromosome you are interested in:
-
-    Put the heterozygous sites of the target chromosome into a dataframe. Each row represents a site. MADSEQ requires at least four fields named as below in the dataframe:
-    
-    * __chr__ : the chromosome number
-    * __position__ : the position (locus) of the site
-    * __Ref_D__ : read depth for the reference allele
-    * __Alt_D__ : read depth for the alternative allele
-    
-    In the dataframe, each row represents a locus on the target chromosome, and each column contains one of the four fields.    
-    You should make sure that all the loci you put in the dataframe are from **the same chromosome**, and they are all **heterozygous**.
-    
-2. A numeric vector contains the read depth for all the sites from the same chromosome, and a numeric number contains the average coverage for the whole genome.
-  
-  
-**Note**: sometimes the sequencing data can be noisy, you may need to filter/process your data before the application of MADSEQ models. The coverage of sequencing data usually is biased because of GC content, you may need to normalize your read depth by GC content. If you have a large sample size, you can quantile normalize the read depth as well.
 
 ### Example Data
 
-There are two sets of example data come with the package, the one named "aneuploidyChrom" is the data for a chromosome with aneuploidy, the data named "normalChrom" is the data for a normla chromosome.
+There are two sets of example data come with the package:
 
-**Note**: Your data should at least have the fields showed in the example data.
+1. A bam file named __aneuploidy.bam__ and a vcf file names __aneuploidy.vcf.gz__
+   for a sample containing trisomy in chromosome 18. 
+2. A bam file named __normal.bam__ and a vcf file names __normal.vcf.gz__
+   for a normal sample.
+3. A bed file named __target.bed__ containing the targeted regions.
 
-```{r,collapse=TRUE}
-# load the package
-library("MADSEQ")
-# To load the aneuploidy data
-data(aneuploidyChrom)
-# There is one dataframe with the heterozygous sites, one vector with coverage, 
-# and a number with coverage for the whole genome
-# Check the data
-head(aneuploidyChrom)
-head(aneuploidy_coverage)
-genome_coverage
-
-# To load the normal data
-data(normalChrom)
-# To check the data
-head(normalChrom)
-head(normal_coverage)
-
+```{r, echo = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-
-
-### check if your dataframe meet the requirements:
-
-**Note**: the following example use the example data comes with the package. To load the data use function `data(aneuploidyChrom)`. To get help with the example data by `?aneuploidyChrom`.
-
-Use the `validateData()` function to check if your dataframe meet all the requirements and could be taken as the input for further analysis by MADSEQ. If the dataframe meets the requirements, it will return TRUE. If it doesn't meet the requirement, it will give an error explaining why it fails.
-
-```{r,error=TRUE,collapse=TRUE}
-# check if the dataframe "aneuploidy" is valid for MADSEQ analysis
-validateData(aneuploidyChrom)
-
-
-# load the sample data invalid
-data(invalid)
-
-# check if the dataframe "invalid" is valid for MADSEQ analysis
-validateData(invalid)
-
-```
-
-## Run Models
-
-When the data is ready, you can begin to apply the four models (normal, monosomy, mitotic trisomy, meiotic trisomy) to fit your data respectively using `runModelOne()`, `runModelMonosomy()`, `runModelTrisomy()`, `runModelFour()` functions.
-
-1. Use the **normal model** to fit the data
+To access the data use 
 ```{r,eval=FALSE}
-# use the normal model to fit the aneuploidy data
-require("rjags")
-normal = runModelOne(data=aneuploidyChrom, data_coverage = aneuploidy_coverage, 
-                     control_coverage = genome_coverage, checkConvergence=T,plot=T)
-# If checkConvergence is TRUE, it will check the convergence of the posterior distribution.
-# If plot is TRUE, it will plot the alternative allele frequency along the chromosome.
-# The function will return a MadSeqOutput object. 
-## [1] "converged!"
+system.file("extdata","aneuploidy.bam",package="MADSEQ")
+system.file("extdata","aneuploidy.vcf.gz",package="MADSEQ")
+```
+__Note__: This is just a set of example data, only contains a very little region
+of the genome.
+
+## Use The Package
+
+We will start with the bam file, vcf file and bed file in the example data
+to show you each step for the analysis.
+
+### Prepare coverage information
+
+Started with bam file and bed file, you can use __prepareCoverageGC__ function
+to get the coverage and GC information for each targeted regions.
+
+```{r}
+## load the package
+suppressMessages(library("MADSEQ"))
+
+## get path to the location of example data
+aneuploidy_bam = system.file("extdata","aneuploidy.bam",package="MADSEQ")
+normal_bam = system.file("extdata","normal.bam",package="MADSEQ")
+target = system.file("extdata","target.bed",package="MADSEQ")
+
+## Note: for your own data, just specify the path to the location of your file
+## using character.
+
+## prepare coverage and GC content for each targeted region
+# aneuploidy sample
+aneuploidy_cov = prepareCoverageGC(target_bed=target, bam=aneuploidy_bam, "hg19")
+
+# normal sample
+normal_cov = prepareCoverageGC(target_bed=target, bam=normal_bam, "hg19")
+
+## view the first two rows of prepared coverage data (A GRanges Object)
+aneuploidy_cov[1:2]
+
+normal_cov[1:2]
 ```
 
-```{r, fig.height=3, fig.width=5,fig.align='center',echo=FALSE}
-par(mar=c(2,4,2,2))
-plot(aneuploidyChrom$position,aneuploidyChrom$Alt_D/(aneuploidyChrom$Alt_D+aneuploidyChrom$Ref_D),pch=20,col="blue",ylim=c(0,1),xlab="position",ylab="Alternative Allele Frequency")
-abline(h=mean(aneuploidyChrom$Alt_D/(aneuploidyChrom$Alt_D+aneuploidyChrom$Ref_D)),lwd=3,lty=2)
+### Normalize coverage information
+
+The normalization function takes prepared coverage GRanges object from
+__prepareCoverageGC__ function, normalize the coverage and calculate the 
+expected coverage for the sample.
+If there is only one sample, the function will correct the coverage by GC 
+content, and take the average coverage for the whole genome as expected coverage. 
+If there are more than one samples given, the function will first quantile 
+normalize coverage across samples, then correct the coverage by GC for each 
+sample. If control sample is not specified, the expected coverage is the median 
+coverage across all samples, if a normal control is specified, the average 
+coverage for control sample is taken as expected coverage for further analysis.
+
+__Note:__ 
+
+1. If you have more than one samples, please make sure they are targeted
+by the same regions.
+2. If you have more than one samples, please separate female samples and male
+samples, which means normalize them separately; because sex chromosomes can bias
+the normalization.
+3. One sample is good to go, however multiple samples will help you get a better 
+normalization.
+
+#### If you only have one sample
+  _If you choose to write the output to file (recommended)_
+```{r}
+## normalize coverage data
+## I set plot=F here because similar plot will show in the following example
+normalizeCoverage(aneuploidy_cov,writeToFile = T, destination = ".",plot=F)
 ```
 
+  _If you don't want to write output to file_
+```{r}
+## normalize coverage data
+aneuploidy_normed = normalizeCoverage(aneuploidy_cov,writeToFile = F,plot=F)
+
+## a GRangesList object will be produced by the function, look at it by
+names(aneuploidy_normed)
+aneuploidy_normed[["aneuploidy_cov"]]
+```
+
+#### If you have more than one samples, without a normal control
+  _If you choose to write the output to file (recommended)_
+```{r}
+## normalize coverage data
+normalizeCoverage(aneuploidy_cov, normal_cov,
+                  writeToFile = T, destination = ".", plot=F)
+```
+
+  _If you don't want to write output to file_
+```{r,fig.height=6, fig.width=6,fig.align='center'}
+## normalize coverage data
+normed_without_control = normalizeCoverage(aneuploidy_cov, normal_cov, 
+                                           writeToFile = F, plot=T)
+
+## a GRangesList object will be produced by the function
+length(normed_without_control)
+names(normed_without_control)
+
+## subsetting
+normed_without_control[["aneuploidy_cov"]]
+normed_without_control[["normal_cov"]]
+```
+
+#### If you have more than one samples, with a normal control
+  _If you choose to write the output to file (recommended)_
+```{r}
+## normalize coverage data, normal_cov is the control sample
+normalizeCoverage(aneuploidy_cov, control=normal_cov,
+                  writeToFile = T, destination = ".",plot=F)
+```
+
+  _If you don't want to write output to file_
+```{r}
+normed_with_control = normalizeCoverage(aneuploidy_cov, control=normal_cov, 
+                                        writeToFile = F, plot=F)
+
+## a GRangesList object will be produced by the function
+length(normed_without_control)
+names(normed_with_control)
+```
+
+### Prepare heterozygous sites
+
+Having vcf.gz file and target bed file ready, use __prepareHetero__ function to
+process the heterozygous sites.
+
+```{r}
+## specify the path to vcf.gz file
+aneuploidy_vcf = system.file("extdata","aneuploidy.vcf.gz",package="MADSEQ")
+
+## target bed file specified before
+
+## If you choose to write the output to file (recommended)
+prepareHetero(aneuploidy_vcf, target_bed=target, genome="hg19", 
+              writeToFile=T, destination=".")
+
+## If you don't want to write output to file
+aneuploidy_hetero = prepareHetero(aneuploidy_vcf, target_bed=target, 
+                                  genome="hg19", writeToFile=F)
+
+```
+
+### Run MadSeq model to detect potential mosaic aneuploidy
+
+The function __runMadSeq__ will run the models and select the best model for 
+the input data. 
+
+__Note:__ 
+
+1. Among three normalized coverage sets listed above (one sample,
+two samples without control, two samples with a control), we will use the 
+two samplew with a control case for the following analysis.
+2. Because these models are based on MCMC sampling, the running process
+can be very long. Running different chromosomes parallel in background or High
+Performance Computer Cluster is highly recommended.
+
+
+#### If the normalized coverage and processed heterozygous sites have been written into files 
+```{r,fig.height=4, fig.width=6,fig.align='center'}
+## specify the path to processed files
+aneuploidy_hetero = "./aneuploidy.vcf.gz_filtered_heterozygous.txt"
+aneuploidy_normed_cov = "./aneuploidy_cov_normed_depth.txt"
+
+## run the model
+aneuploidy_chr18 = runMadSeq(hetero=aneuploidy_hetero, 
+                             coverage=aneuploidy_normed_cov, 
+                             target_chr="chr18",
+                             nChain=1, nStep=5000, thinSteps=1,
+                             adapt=5000,burnin=5000)
+
+## An MadSeq object will be returned
+aneuploidy_chr18
+```
+__Note:__ In order to save time, we only run 1 chain with a much less steps 
+compared with default settings. For real cases, the default settings are
+recommended.
+
+#### If the normalized coverage and processed heterozygous sites have __NOT__ been written into files
 ```{r,eval=FALSE}
-# The object of class MadSeqOutput has its own print method
-print(normal)
-## Posterior Distribution for Parameters
-##          mean        95% HDI
-## kappa 6.93000   [5.61, 8.29]
-## mu    0.46400 [0.464, 0.464]
-## p1    0.99200      [0.98, 1]
-## p2    0.00835      [0, 0.02]
-## 
-## BIC
-## [1] 4388.47
-# you can check the full description of each parameters at the end of this page.
+## subset normalized coverage for aneuploidy sample from the GRangesList returned by normalizeCoverage function
+aneuploidy_normed_cov = normed_with_control[["aneuploidy_cov"]]
+
+## run the model
+aneuploidy_chr18 = runMadSeq(hetero=aneuploidy_hetero, 
+                             coverage=aneuploidy_normed_cov, 
+                             target_chr="chr18")
+
+## An MadSeq object will be returned
+aneuploidy_chr18
 ```
 
-2. Use the **mosaic monosomy** model to fit the data
-```{r,eval=FALSE}
-# use mosaic monosomy model to fit the aneuploidy data
-monosomy = runModelMonosomy(data=aneuploidyChrom, data_coverage = aneuploidy_coverage, 
-                     control_coverage = genome_coverage, checkConvergence=T,plot=F)
-## [1] "converged!"
+The __MadSeq__ object from the __runMadSeq__ function contains:
 
-print(monosomy)
-## Posterior Distribution for Parameters
-##           mean             95% HDI
-## f       0.0119  [4.24e-07, 0.0349]
-## kappa   6.9100        [5.57, 8.24]
-## mu[1]   0.4670      [0.464, 0.473]
-## mu[2]   0.4610      [0.455, 0.464]
-## d1      0.0030 [1.06e-07, 0.00885]
-## d2      0.0030 [1.06e-07, 0.00883]
-## m_cov 129.0000          [128, 130]
-## p1      0.4960       [0.43, 0.565]
-## p2      0.4950       [0.43, 0.565]
-## p3      0.0081           [0, 0.02]
-## 
-## BIC
-## [1] 4400.937
-```
+* The posterior distribution of the selected model
+* The delta BIC value between selected model and other models
 
-3. Use the **mosaic mitotic trisomy** model to fit the data
-```{r,eval=FALSE}
-# use mosaic mitotic trisomy model to fit the aneuploidy data
-mitotic_trisomy = runModelTrisomy(data=aneuploidyChrom, data_coverage = aneuploidy_coverage, 
-                     control_coverage = genome_coverage, checkConvergence=T,plot=F)
-
-## [1] "converged!"
-
-print(mitotic_trisomy)
-## Posterior Distribution for Parameters
-##           mean         95% HDI
-## f       0.3950  [0.235, 0.554]
-## kappa   9.1100     [6.5, 12.2]
-## mu[1]   0.5460  [0.517, 0.574]
-## mu[2]   0.3830  [0.357, 0.412]
-## d1      0.0826   [0.053, 0.11]
-## d2      0.0806 [0.0522, 0.107]
-## m_cov 156.0000      [145, 166]
-## p1      0.4920    [0.43, 0.55]
-## p2      0.5000  [0.445, 0.565]
-## p3      0.0080       [0, 0.02]
-## 
-## BIC
-## [1] 4371.356
-```
-
-4. Use the **mosaic meiotic trisomy** model to fit the data
-```{r,eval=FALSE}
-# use mosaic meiotic trisomy model to fit the aneuploidy data
-meiotic_trisomy = runModelFour(data=aneuploidyChrom, data_coverage = aneuploidy_coverage, 
-                     control_coverage = genome_coverage, checkConvergence=T,plot=F)
-
-## [1] "converged!"
-
-print(meiotic_trisomy)
-## Posterior Distribution for Parameters
-##           mean        95% HDI
-## f     5.41e-01 [0.498, 0.579]
-## p1    3.13e-01  [0.285, 0.34]
-## p2    3.90e-01 [0.355, 0.415]
-## p3    1.38e-01   [0.12, 0.16]
-## p4    1.51e-01 [0.135, 0.175]
-## p5    7.33e-03      [0, 0.02]
-## kappa 1.04e+02    [63.2, 147]
-## mu[1] 5.71e-01 [0.564, 0.577]
-## mu[2] 3.60e-01 [0.354, 0.366]
-## mu[3] 1.89e-01   [0.177, 0.2]
-## mu[4] 7.62e-01 [0.749, 0.777]
-## d1    1.07e-01 [0.101, 0.113]
-## d2    1.04e-01 [0.0977, 0.11]
-## d3    1.89e-01   [0.177, 0.2]
-## d4    2.38e-01 [0.223, 0.251]
-## m_cov 1.65e+02     [162, 168]
-## 
-## BIC
-## [1] 4289.336
-```
-
-**Note:** Besides setting `checkConvergence=T` in `runModel()` function, you can also check the convergence of the MadSeqOutput by using `tracePlot(MadSeqOutput)` function.
-
-## Model Comparison
-
-After fit the data with all the models, next step is comparison of the goodness of fit of these models using BIC. The `modelSelection()` function will return the model fit the data best. The `modelComparison()` function will calculate the delta BIC between the best model and other models. 
-
-```{r, eval=FALSE}
-best_model = modelSelection(normal, monosomy, mitotic_trisomy, meiotic_trisomy)
-## Order of the preference of models
-##     four  trisomy      one monosomy 
-## 4289.336 4371.356 4388.470 4400.937  
-## 
-## Best Model
-##     four 
-## 4289.336 
-
-best_model
-## [1] "four"
-
-deltaBIC = modelComparison(normal, monosomy, mitotic_trisomy, meiotic_trisomy)
-
-deltaBIC
-##    four   trisomy     one  monosomy 
-## 0.00000  82.01984  99.13448 111.60098 
-
-```
-
-The value of delta BIC suggests the strength of the evidence against the model with the higher BIC value. It can be summarized as
+__Note:__ The value of delta BIC suggests the strength of the confidence of the
+selected model against other models. It can be summarized as
 
 ```{r,echo=FALSE,warning=FALSE}
-data(meiotic_trisomy)
 BIC = c("[0,2]","(2,6]","(6,10]",">10")
 evidence = c("Not worth more than a bare mention","Positive","Strong","Very Strong")
 table = data.frame(BIC,evidence)
@@ -250,110 +277,46 @@ library(knitr)
 kable(table,col.names =c("deltaBIC","Evidence against higher BIC") ,align="c")
 ```
 
-So in the "aneuploidy" data, the model **meiotic trisomy** is selected with strong evidence against other models.
-
-## Analyze Posterior Distribution
-After you get the best model selected, you can get the estimation of the fraction of aneuploidy cells as well as other parameters using the output (an object of MadSeqOutput class, which is produced by one of the `runModel()` functions) from that model.
-
-**Note: you can check the full description of each parameter at the end of this documentation.**
-
-### Access Sampled Posterior Disbribution
-The sampled posterior distribution from the model is stored in the object of MadSeqOutput class. You can access the posterior distribution of all the parameters by checking the output.
-```{r,eval=TRUE,collapse=TRUE}
-# The object of MadSeqOutput class has two component:
-# 1.posterior: a matrix stores the sampled posterior distribution;
-# 2.BIC: the BIC value for this model
-str(meiotic_trisomy)
-```
-```{r,eval=FALSE}
-# You can access the full posterior distribution by
-meiotic_trisomy$posterior
-
-# or
-
-meiotic_trisomy["posterior"]
-
-# In the matrix, each column is one parameter, each row is a sampled value for that parameter.
-```
-
-
-### Statistics of Posterior Disbribution
-The `print()` function for MadSeqOutput class will print out the mean and 95% highest density interval (95% HDI) of the posterior estimation for each parameters in the model.
-
-```{r,eval=FALSE}
-print(meiotic_trisomy)
-## Posterior Distribution for Parameters
-##           mean        95% HDI
-## f     5.41e-01 [0.498, 0.579]
-## p1    3.13e-01  [0.285, 0.34]
-## p2    3.90e-01 [0.355, 0.415]
-## p3    1.38e-01   [0.12, 0.16]
-## p4    1.51e-01 [0.135, 0.175]
-## p5    7.33e-03      [0, 0.02]
-## kappa 1.04e+02    [63.2, 147]
-## mu[1] 5.71e-01 [0.564, 0.577]
-## mu[2] 3.60e-01 [0.354, 0.366]
-## mu[3] 1.89e-01   [0.177, 0.2]
-## mu[4] 7.62e-01 [0.749, 0.777]
-## d1    1.07e-01 [0.101, 0.113]
-## d2    1.04e-01 [0.0977, 0.11]
-## d3    1.89e-01   [0.177, 0.2]
-## d4    2.38e-01 [0.223, 0.251]
-## m_cov 1.65e+02     [162, 168]
-## 
-## BIC
-## [1] 4289.336
-```
-
-The `summary()` function for MadSeqOutput class will produce the quantiles of the parameters from the posterior distribution.
-
-```{r,eval=FALSE}
-summary(meiotic_trisomy)
-##        f                p1               p2               p3               p4                    
-##  Min.   :0.4624   Min.   :0.2500   Min.   :0.3250   Min.   :0.0900   Min.   :0.1000    
-##  1st Qu.:0.5265   1st Qu.:0.3050   1st Qu.:0.3800   1st Qu.:0.1300   1st Qu.:0.1450   
-##  Median :0.5403   Median :0.3150   Median :0.3900   Median :0.1400   Median :0.1500     
-##  Mean   :0.5406   Mean   :0.3133   Mean   :0.3901   Mean   :0.1384   Mean   :0.1509   
-##  3rd Qu.:0.5544   3rd Qu.:0.3250   3rd Qu.:0.4000   3rd Qu.:0.1450   3rd Qu.:0.1600  
-##  Max.   :0.6367   Max.   :0.3800   Max.   :0.4550   Max.   :0.1950   Max.   :0.2050     
-##      kappa            mu[1]            mu[2]            mu[3]            mu[4]                  
-##  Min.   : 33.73   Min.   :0.5585   Min.   :0.3458   Min.   :0.1667   Min.   :0.7310     
-##  1st Qu.: 88.30   1st Qu.:0.5691   1st Qu.:0.3575   1st Qu.:0.1855   1st Qu.:0.7573    
-##  Median :102.20   Median :0.5713   Median :0.3596   Median :0.1894   Median :0.7620  
-##  Mean   :103.57   Mean   :0.5713   Mean   :0.3596   Mean   :0.1895   Mean   :0.7620    
-##  3rd Qu.:117.11   3rd Qu.:0.5735   3rd Qu.:0.3617   3rd Qu.:0.1934   3rd Qu.:0.7667    
-##  Max.   :215.28   Max.   :0.5861   Max.   :0.3717   Max.   :0.2159   Max.   :0.7891   
-#.......
-```
-
-
-###Plot Posterior
-The `plotPosterior()` function takes the object of MadSeqOutput class as the input, and print out the posterior disbribution for each parameters in the model. 
+### Visualize the selected model
+There are a group of plot functions to plot the output MadSeq object
+from the __runMadSeq__.
 
 ```{r, fig.height=4, fig.width=6,fig.align='center'}
-# you can specify the parameters that you are interested in using variable option
-# otherwise the default setting will plot all the parameters 
-plotPosterior(meiotic_trisomy,variable = c("f","kappa","mu[1]","mu[2]","mu[3]","mu[4]"))
-```        
-    
-    
-The `plotFraction()` function will plot the disbribution of the fraction of aneuploidy cells, labeling the mean and Highest posterior density invertals you specified (default: 95% HDI)
-```{r, fig.height=3, fig.width=4,fig.align='center'}
-par(mar=c(2,2,2,2))
-plotFraction(meiotic_trisomy,prob=0.95)
-```    
-    
-The `plotMixture()` function will plot the posterior distributions of the alternative allele frequencies. From this plot, you can get some sense about the mean of each mixture, the weight of each mixture and the distance between mixtures.
-```{r, fig.height=3, fig.width=5,fig.align='center'}
-par(mar=c(3,4,2,2))
-plotMixture(meiotic_trisomy)
+## plot the posterior distribution for all the parameters in selected model
+plotMadSeq(aneuploidy_chr18)
+```
+
+```{r, fig.height=4, fig.width=4,fig.align='center'}
+## plot the histogram for the estimated fraction of aneuploidy
+plotFraction(aneuploidy_chr18, prob=0.95)
+```
+
+```{r, fig.height=4, fig.width=5,fig.align='center'}
+## plot the distribution of AAF for heterozygous sites as estimated by the model
+plotMixture(aneuploidy_chr18)
 ```
 
 ## Description of All Parameters
 ```{r,echo=FALSE,warning=FALSE}
-parameters = c("f","m","mu[1]","mu[2]","mu[3]","mu[4]","kappa","p1","p2","p3","p4","p5","d1","d2"     
-               ,"d3","d4","m_cov","p_cov","r_cov")
-explains = c("Fraction of mosaic aneuploidy","The midpoint","Mean of mixture 1: the AAFs of this mixture shifted from midpoint to some higher values", "Mean of mixture 2: the AAFs of this mixture shifted from midpoint to some lower values","Mean of mixture 3: the AAFs of this mixture shifted from 0 to some higher value (only in meiotic model)","Mean of mixture 4: the AAFs of this mixture shifted from 1 to some lower value (only in meiotic model)","Indicate variance of the AAF mixtures: larger kappa means smaller variance","Weight of mixture 1: indicate the proportion of heterozygous sites in the mixture 1","Weight of mixture 2: indicate the proportion of heterozygous sites in the mixture 2","Weight of mixture 3: indicate the proportion of heterozygous sites in the mixture 3 (only in meiotic model)","Weight of mixture 4: indicate the proportion of heterozygous sites in the mixture 4 (only in meiotic model)","Weight of outlier component: the AAF of 1% sites might not well behaved, so these sites are treated as noise.","Distance that mixture 1 shifted from the midpoint","Distance that mixture 2 shifted from the midpoint","Distance that mixture 3 shifted from 0 (only in meiotic model)","Distance that mixture 4 shifted from 1 (only in meiotic model)","Mean coverage of all the sites from the chromosome, estimated from a negative binomial distribution","Prob of the negative binomial distribution for the coverage","Another parameter (r) for the negative binomial disbribution, small r means large variance")
+parameters = c("f","m","mu[1]","mu[2]","mu[3] (LOH model)",
+               "mu[3] (meiotic trisomy model)","mu[4]","kappa","p[1]","p[2]",
+               "p[3]","p[4]","p[5]","m_cov","p_cov","r_cov")
+explains = c("Fraction of mosaic aneuploidy",
+             "The midpoint of the alternative allele frequency (AAF) for all heterozygous sites",
+             "Mean AAF of mixture 1: the AAFs of this mixture shifted from midpoint to some higher values", 
+             "Mean AAF of mixture 2: the AAFs of this mixture shifted from midpoint to some lower values",
+             "Mean AAF of mixture 3: In LOH model, mu[3] indicates normal sites without loss of heterozygosity",
+             "Mean AAF of mixture 3: In meiotic model, the AAFs of this mixture shifted from 0 to some higher value",
+             "Mean AAF of mixture 4: the AAFs of this mixture shifted from 1 to some lower value (only in meiotic model)",
+             "Indicate variance of the AAF mixtures: larger kappa means smaller variance",
+             "Weight of mixture 1: indicate the proportion of heterozygous sites in the mixture 1",
+             "Weight of mixture 2: indicate the proportion of heterozygous sites in the mixture 2",
+             "Weight of mixture 3: indicate the proportion of heterozygous sites in the mixture 3 (only in LOH and meiotic model)",
+             "Weight of mixture 4: indicate the proportion of heterozygous sites in the mixture 4 (only in meiotic model)",
+             "Weight of outlier component: the AAF of 1% sites might not well behaved, so these sites are treated as noise.",
+             "Mean coverage of all the sites from the chromosome, estimated from a negative binomial distribution",
+             "Prob of the negative binomial distribution for the coverage",
+             "Another parameter (r) for the negative binomial disbribution of the coverage, small r means large variance")
 table = data.frame(parameters,explains)
 kable(table,col.names =c("parameters","description") ,align="c")
 ```

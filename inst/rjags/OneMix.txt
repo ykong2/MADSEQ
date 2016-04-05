@@ -1,21 +1,12 @@
 model{
+# AAF part
 for (i in 1:nSNP){
 #likelihood
-z[i] ~ dbin(theta[i],N[i])
-#prior
-theta[i] ~ dbeta(a[mixture[i]],b[mixture[i]])
+z[i] ~ dbetabin(a[mixture[i]],b[mixture[i]],N[i])
 mixture[i] ~ dcat(p[1:Nclust])
 }
-for (i in 1:nSites){
-# likelihood
-# coverage for all the other sites
-N_cov[i] ~ dnegbin(p_cov,r_cov)
-}
+
 #prior
-p_cov <- r_cov/(r_cov+m_cov)
-m_cov <- m0
-r_cov ~ dgamma(0.01,0.01)
-#hyperprior
 a[1] <- mu*kappa
 b[1] <- (1-mu)*kappa
 mu <- m 
@@ -24,6 +15,14 @@ a[2] <- 1
 b[2] <- 1
 p[1] <- 0.99
 p[2] <- 0.01
-p1 <- sum(mixture[1:nSNP]==1)/nSNP
-p2 <- sum(mixture[1:nSNP]==2)/nSNP
+
+# coverage part
+for (i in 1:nSites){
+# likelihood
+N_cov[i] ~ dnegbin(p_cov,r_cov)
+}
+#prior
+p_cov <- r_cov/(r_cov+m_cov)
+r_cov ~ dgamma(0.01,0.01)
+m_cov <- m0
 }
