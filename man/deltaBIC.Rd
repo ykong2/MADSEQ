@@ -14,8 +14,19 @@ deltaBIC(object)
 \item{object}{A \code{MadSeq} object returned by \code{\link{runMadSeq}} 
 function}
 }
+\value{
+A \code{numeric} vector containing deltaBIC values between selected
+model and other models
+}
 \description{
 An S4 method to access the delta BIC values of \code{\link{MadSeq}} object
+}
+\examples{
+## load the example MadSeq object come with the package
+data("aneuploidy_chr18")
+
+## access deltaBIC 
+deltaBIC(aneuploidy_chr18)
 }
 \author{
 Yu Kong

@@ -14,9 +14,19 @@ posterior(object)
 \item{object}{A \code{MadSeq} object returned by \code{\link{runMadSeq}} 
 function}
 }
+\value{
+A \code{matrix} containing posterior distribution of selected model
+}
 \description{
 An S4 method to access the posterior distribution of
 \code{\link{MadSeq}} object
+}
+\examples{
+## load the example MadSeq object come with the package
+data("aneuploidy_chr18")
+
+## access posterior distribution
+posterior(aneuploidy_chr18)
 }
 \author{
 Yu Kong

@@ -4,7 +4,7 @@
 \name{plotMixture}
 \alias{plotMixture}
 \alias{plotMixture,MadSeq-method}
-\title{density plot for the posterior distribution of alternative allele frequency 
+\title{density plot for the posterior distribution of alternative allele frequency
 estimated from the selected model}
 \usage{
 plotMixture(object)
@@ -21,6 +21,13 @@ density plot for the posterior distribution of AAF
 \description{
 density plot presents the posterior distribution of alternative allele
 frequency (AAF) estimated from selected model
+}
+\examples{
+## load the example MadSeq object come with the package
+data("aneuploidy_chr18")
+
+## plot the distribution of estimated AAF
+plotMixture(aneuploidy_chr18)
 }
 \author{
 Yu Kong

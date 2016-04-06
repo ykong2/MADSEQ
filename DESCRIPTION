@@ -8,12 +8,12 @@ Author:
     person("Yu","Kong",email="yu.kong@phd.einstein.yu.edu",role=c("aut","cre"))
 Maintainer: Yu Kong <yu.kong@phd.einstein.yu.edu>
 Description: The MADSEQ package provides a group of hierarchical Bayeisan 
-        models for the detection of mosaic aneuploidy, the inference of the type
-        of aneuploidy and also for the quantification of the fraction of 
+        models for the detection of mosaic aneuploidy, the inference of the 
+        type of aneuploidy and also for the quantification of the fraction of 
         aneuploid cells in the sample.
-License: GPL-3
+License: GPL(>=2)
 Depends:
-    R(>= 2.14.0),
+    R(>= 3.2),
     rjags(>= 4-6),
     BiocGenerics(>= 0.16.1)
 Suggests:

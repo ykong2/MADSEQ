@@ -4,7 +4,7 @@
 \alias{prepareHetero}
 \title{prepare heterozygous sites for aneuploidy detection}
 \usage{
-prepareHetero(vcffile, target_bed, genome = "hg19", writeToFile = T,
+prepareHetero(vcffile, target_bed, genome = "hg19", writeToFile = TRUE,
   destination = NULL)
 }
 \arguments{
@@ -47,13 +47,13 @@ FORMAT field
 }
 \examples{
 ## specify the path to the vcf.gz file for the aneuploidy sample
-aneuploidy_vcf = system.file("extdata","aneuploidy.vcf.gz",package="MADSEQ")
+aneuploidy_vcf=system.file("extdata","aneuploidy.vcf.gz",package="MADSEQ")
 
 ## specify the path to the bed file containing targeted region
 target = system.file("extdata","target.bed",package="MADSEQ")
 
 ##------ if not write to file ------
-aneuploidy_hetero = prepareHetero(aneuploidy_vcf, target, writeToFile=FALSE)
+aneuploidy_hetero=prepareHetero(aneuploidy_vcf, target, writeToFile=FALSE)
 
 ##------ if write to file ------
 prepareHetero(aneuploidy_vcf, target, writeToFile=TRUE, destination=".")

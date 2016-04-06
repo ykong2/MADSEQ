@@ -4,20 +4,21 @@
 \alias{normalizeCoverage}
 \title{correct coverage bias due to GC content}
 \usage{
-normalizeCoverage(object, ..., control = NULL, writeToFile = T,
-  destination = NULL, plot = T)
+normalizeCoverage(object, ..., control = NULL, writeToFile = TRUE,
+  destination = NULL, plot = TRUE)
 }
 \arguments{
 \item{object}{A \code{GRanges} object returned 
 from \code{\link{prepareCoverageGC}} function.}
 
-\item{...}{additional \code{GRanges} object to pass. \strong{Note1:} If there is 
-only one Granges object given, then coverage will be corrected by GC content.
+\item{...}{additional \code{GRanges} object to pass. \strong{Note1:} If
+there is only one Granges object given, then coverage will be corrected by 
+GC content.
 If there are more than one GRanges object from multiple samples are given, 
 the function  will first quantile normalize coverage across samples, 
 then correct coverage by GC content in each sample. \strong{Note2:} If more
 than one GRanges object provided, make sure they are different samples 
-sequenced by the same protocols, which means the targeted region is the same
+sequenced by the same protocol, which means the targeted region is the same
 \strong{Note3:} If your input samples contain female and male, we suggest
 you separate them to get a more accurate normalization.}
 
@@ -32,13 +33,13 @@ normalized coverage table for each sample provided will be written to
 a \code{\link{GRangesList}} object will be returned}
 
 \item{destination}{A \code{character}, specify the path to the location 
-where the normalized coverage table will be written. Default: \code{NULL}, 
+where the normalized coverage table will be written. Default: \code{NULL},
 the file will be written to current working directory}
 
-\item{plot}{\code{Boolean} Default: \code{TRUE}. If \code{TRUE}, the coverage 
-vs. GC content plot before and after normalization will be plotted. And the 
-average coverage for each chromosome before and after normalization will be 
-plotted}
+\item{plot}{\code{Boolean} Default: \code{TRUE}. If \code{TRUE}, the 
+coverage vs. GC content plot before and after normalization will be plotted
+And the average coverage for each chromosome before and after normalization
+ will be plotted}
 }
 \value{
 If \code{writeToFile} is set to TRUE, normalized coverage will be 
@@ -51,7 +52,7 @@ function to normalize coverage by GC content and quantile normalization
 \note{
 The normalize function works better when you have multiple samples
 sequenced using the same protocol, namely have the same targeted regions. 
-And if you have female sample and male sample, the best way is to normalize 
+And if you have female sample and male sample, the best way is to normalize
 them separately.
 }
 \examples{
@@ -94,7 +95,7 @@ aneuploidy_cov_gc = prepareCoverageGC(target,aneuploidy_bam,"hg19")
 normal_cov_gc = prepareCoverageGC(target,normal_bam,"hg19")
 
 ## normalize the coverage
-normed = normalizeCoverage(aneuploidy_cov_gc,normal_cov_gc,writeToFile=FALSE)
+normed=normalizeCoverage(aneuploidy_cov_gc,normal_cov_gc,writeToFile=FALSE)
 names(normed)
 normed["aneuploidy_cov_gc"]
 normed["normal_cov_gc"]
@@ -129,8 +130,8 @@ Yu Kong
 }
 \references{
 C. Alkan, J. Kidd, T. Marques-Bonet et al (2009).
-Personalized copy number and segmental duplication maps using next-generation 
-sequencing. Nature Genetics, 41(10):1061-7.
+Personalized copy number and segmental duplication maps using 
+next-generation sequencing. Nature Genetics, 41(10):1061-7.
 }
 \seealso{
 \code{\link{prepareCoverageGC}}

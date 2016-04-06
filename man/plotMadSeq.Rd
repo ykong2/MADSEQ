@@ -11,8 +11,8 @@ plotMadSeq(object)
 \S4method{plotMadSeq}{MadSeq}(object)
 }
 \arguments{
-\item{object}{A \code{\link{MadSeq}} object returned by \code{\link{runMadSeq}} 
-function.}
+\item{object}{A \code{\link{MadSeq}} object returned by 
+\code{\link{runMadSeq}} function.}
 }
 \value{
 the density plot for parameters in the posterior distribution of 
@@ -21,6 +21,13 @@ selected model.
 \description{
 plot the density plot for each of the parameters in the posterior
 distribution from selected model
+}
+\examples{
+## load the example MadSeq object come with the package
+data("aneuploidy_chr18")
+
+## plot the posterior distribution
+plotMadSeq(aneuploidy_chr18)
 }
 \author{
 Yu Kong

@@ -33,11 +33,11 @@ Default: 10000. If the posterior distribution is not converged, increasing
 burnin steps can be helpful.}
 
 \item{nChain}{A \code{integer} indicate the number of chains for 
-the MCMC sampling. Default: 2. \bold{Note:} More than 1 chain is required if 
-\code{checkConvergence} is set to \code{TRUE}.}
+the MCMC sampling. Default: 2. \bold{Note:} More than 1 chain is required 
+if \code{checkConvergence} is set to \code{TRUE}.}
 
-\item{nStep}{A \code{integer} indicate the number of steps to be recorded for
-the MCMC sampling. Default: 10000. Generally, the more steps you record, 
+\item{nStep}{A \code{integer} indicate the number of steps to be recorded 
+for the MCMC sampling. Default: 10000. Generally, the more steps you record,
 the more accurate the estimation is.}
 
 \item{thinSteps}{A \code{integer} indicate the number of steps to "thin" 
@@ -64,15 +64,15 @@ estimation of the fraction of aneuploid cells.
 }
 \note{
 1.If you didn't write normalized coverage into file, please subset the
-normalized coverage \code{GRanges} object from the \code{GRangesList} object 
-returned from the \code{\link{normalizeCoverage}} funciton. \cr
+normalized coverage \code{GRanges} object from the \code{GRangesList} 
+object returned from the \code{\link{normalizeCoverage}} funciton. \cr
 2. When specify \code{target_chr}, please make sure it consist with the 
 contig names in your sequencing data, example: "chr1" and "1". \cr
-3. If \code{checkConvergence} set to TRUE, the \code{nChain} has to be >2.\cr
+3. If \code{checkConvergence} set to TRUE, the \code{nChain} has to be >2\cr
 4. If it shows that your chains are not converged, 
 helpful options are increasing the adapt and burnin steps.\cr
-5. Because the model is an MCMC sampling process, it can take a very long time
-to finish. Running in the background or HPC is recommended.
+5. Because the model is an MCMC sampling process, it can take a very long 
+time to finish. Running in the background or HPC is recommended.
 }
 \examples{
 ## ------------------------------------------------------------------------

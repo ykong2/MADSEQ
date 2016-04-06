@@ -28,6 +28,13 @@ estimated by the selected model.
 If normal model has been selected by \code{\link{runMadSeq}} function,
 no fraction plot will be produced by this function.
 }
+\examples{
+## load the example MadSeq object come with the package
+data("aneuploidy_chr18")
+
+## plot estimated fraction of aneuploid cells
+plotFraction(aneuploidy_chr18)
+}
 \author{
 Yu Kong
 

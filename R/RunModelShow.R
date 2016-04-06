@@ -27,10 +27,10 @@
 #' Default: 10000. If the posterior distribution is not converged, increasing 
 #' burnin steps can be helpful.
 #' @param nChain A \code{integer} indicate the number of chains for 
-#' the MCMC sampling. Default: 2. \bold{Note:} More than 1 chain is required if 
-#' \code{checkConvergence} is set to \code{TRUE}.
-#' @param nStep A \code{integer} indicate the number of steps to be recorded for
-#' the MCMC sampling. Default: 10000. Generally, the more steps you record, 
+#' the MCMC sampling. Default: 2. \bold{Note:} More than 1 chain is required 
+#' if \code{checkConvergence} is set to \code{TRUE}.
+#' @param nStep A \code{integer} indicate the number of steps to be recorded 
+#' for the MCMC sampling. Default: 10000. Generally, the more steps you record,
 #' the more accurate the estimation is. 
 #' @param thinSteps A \code{integer} indicate the number of steps to "thin" 
 #' (thinSteps=1) means save everystep. Default: 2.
@@ -43,15 +43,15 @@
 #' @return An S4 object of class \code{MadSeq} containing the posterior 
 #' distribution for the selected model, and deltaBIC between five models.
 #' @note 1.If you didn't write normalized coverage into file, please subset the
-#' normalized coverage \code{GRanges} object from the \code{GRangesList} object 
-#' returned from the \code{\link{normalizeCoverage}} funciton. \cr
+#' normalized coverage \code{GRanges} object from the \code{GRangesList} 
+#' object returned from the \code{\link{normalizeCoverage}} funciton. \cr
 #' 2. When specify \code{target_chr}, please make sure it consist with the 
 #' contig names in your sequencing data, example: "chr1" and "1". \cr
-#' 3. If \code{checkConvergence} set to TRUE, the \code{nChain} has to be >2.\cr
+#' 3. If \code{checkConvergence} set to TRUE, the \code{nChain} has to be >2\cr
 #' 4. If it shows that your chains are not converged, 
 #' helpful options are increasing the adapt and burnin steps.\cr
-#' 5. Because the model is an MCMC sampling process, it can take a very long time
-#' to finish. Running in the background or HPC is recommended.
+#' 5. Because the model is an MCMC sampling process, it can take a very long 
+#' time to finish. Running in the background or HPC is recommended.
 #' @examples 
 #' ## ------------------------------------------------------------------------
 #' ## The following example is for the case that normalized coverage and 
@@ -98,140 +98,176 @@
 #' @seealso \code{\link{MadSeq}}, \code{\link{plotMadSeq}},
 #'  \code{\link{plotFraction}}, \code{\link{plotMixture}}
 #' @author Yu Kong
-runMadSeq = function(hetero, coverage, target_chr,
-                     adapt=10000, burnin=10000, 
-                     nChain=2, nStep=10000, thinSteps=2,
-                     checkConvergence=FALSE, plot=TRUE){
-  
-  ## prepare data for MCMC
-  ## check if input is the path to file or GRanges object
-  if(class(hetero)=="GRanges"){
-    sample = as.character(substitute(hetero))
-    target_AAF=as.data.frame(hetero[seqnames(hetero)==target_chr])
-  }
-  else if(class(hetero)=="character"){
-    AAF = read.table(hetero,header=T,sep="\t")
-    target_AAF = AAF[AAF$seqnames==target_chr,]
-  }
-  else stop("the file type of 'hetero' is wrong, 
-            please provide the path to filtered heterozygous sites 
-            or the GRanges object containing filtered heterozygous sites!")
-  
-  if(class(coverage)=="GRanges"){
-    target_cov=as.data.frame(coverage[seqnames(coverage)==target_chr])
-    data_coverage = target_cov$normed_depth
-    control_coverage = mean(target_cov$ref_depth,na.rm=T)
-    auto_cov = coverage[seqnames(coverage)!="chrX"&
-                          seqnames(coverage)!="chrY"&
-                          seqnames(coverage)!="X"&
-                          seqnames(coverage)!="Y"]
-    auto_cov_mean = mean(mcols(auto_cov)$normed_depth,na.rm=T)
-  }
-  else if(class(coverage)=="character"){
-    cov = read.table(coverage,header=T,sep="\t")
-    target_cov = cov[cov$seqnames==target_chr,]
-    data_coverage = target_cov$normed_depth
-    control_coverage = mean(target_cov$ref_depth,na.rm=T)
-    sample = strsplit(coverage,"_")[[1]][1]
-    auto_cov = cov[cov$seqnames!="chrX" & cov$seqnames!="chrY" & 
-                     cov$seqnames !="X" & cov$seqnames !="Y",]
-    auto_cov_mean = mean(auto_cov$normed_depth,na.rm=T)
-  }
-  
-  ## if target chr is sex chromosomes, check the copy of sex chromosome
-  if(target_chr=="chrX"|target_chr=="X"){
-    chrX_cov_mean = mean(data_coverage)
-    ## if there is no heterozygous sites on chrX, 
-    ## and the coverage for chrX is much smaller than autosome
-    ## only one X chromosome
-    if(nrow(target_AAF)<20 & (chrX_cov_mean/auto_cov_mean)<0.75){
-      message("there is only one X chromosome")
-      return()
-    } 
-  }
-  else if (target_chr=="chrY"|target_chr=="Y"){
-    auto_cov = coverage[seqnames(coverage)!="chrX"&
-                                 seqnames(coverage)!="chrY"&
-                                 seqnames(coverage)!="X"&
-                                 seqnames(coverage)!="Y"]
-    auto_cov_mean = mean(mcols(auto_cov)$normed_depth,na.rm=T)
-    chrY_cov_mean = mean(data_coverage)
-    chrY_cov_len = length(data_coverage)
-    ## if there is no heterozygous sites on chrY
-    ## and no reads on chrY
-    ## no Y chromosome
-    if(nrow(target_AAF)<20&chrY_cov_len<50){
-      message("there is NO Y chromosome")
-      return()
+runMadSeq = function(
+    hetero,
+    coverage, 
+    target_chr,
+    adapt=10000, 
+    burnin=10000, 
+    nChain=2, 
+    nStep=10000, 
+    thinSteps=2,
+    checkConvergence=FALSE, 
+    plot=TRUE){
+    
+    ## prepare data for MCMC
+    ## check if input is the path to file or GRanges object
+    if(class(hetero)=="GRanges"){
+        sample = as.character(substitute(hetero))
+        target_AAF=as.data.frame(hetero[seqnames(hetero)==target_chr])
     }
-    else if (nrow(target_AAF)<20&(chrY_cov_mean/auto_cov_mean)<0.75){
-      message("there is one Y chromosome")
-      return()
+    else if(class(hetero)=="character"){
+        AAF = read.table(hetero,header=TRUE,sep="\t")
+        target_AAF = AAF[AAF$seqnames==target_chr,]
     }
-  }
-  
-  ## print the number of SNP and coverage information
-  message (paste("total number of heterozygous site:",nrow(target_AAF)))
-  message (paste("total number of coverage",length(data_coverage)))
-  
-  ## if plot is requested
-  if (plot == T){
-    par(mfrow=c(1,1))
-    par(mar = c(5,4,4,2))
-    plotSites(target_AAF)
-    mtext(paste("data_coverage: ", round(mean(data_coverage)),
-                ";control_coverage: ", round(control_coverage),sep=""),
-          side=1, line=-1)
-  }
-  
-  ## basic settings for MCMC
-  load.module("mix")
-
-  ## run normal model
-  normal = runNormal(target_AAF,data_coverage,control_coverage,
-            checkConvergence=checkConvergence,
-            adapt=adapt,burnin=burnin,
-            nChain=nChain,nStep=nStep,thinSteps=thinSteps)
- 
-  ## run monosomy model
-  monosomy = runMonosomy(target_AAF,data_coverage,control_coverage,
-                       checkConvergence=checkConvergence,
-                       adapt=adapt,burnin=burnin,
-                       nChain=nChain,nStep=nStep,thinSteps=thinSteps)
-  
-  ## run mitotic trisomy model
-  mitotic_trisomy = runMitoticTrisomy(target_AAF,data_coverage,control_coverage,
-                                      checkConvergence=checkConvergence,
-                                      adapt=adapt,burnin=burnin,nChain=nChain,
-                                      nStep=nStep,thinSteps=thinSteps)
-  
-  ## run meiotic trisomy model
-  meiotic_trisomy = runMeioticTrisomy(target_AAF,data_coverage,control_coverage,
-                                      checkConvergence=checkConvergence,
-                                      adapt=adapt,burnin=burnin,nChain=nChain,
-                                      nStep=nStep,thinSteps=thinSteps)
-  
-  ## run loss of heterozygosity
-  LOH = runLOH(target_AAF,data_coverage,control_coverage,
-                                      checkConvergence=checkConvergence,
-                                      adapt=adapt,burnin=burnin,nChain=nChain,
-                                      nStep=nStep,thinSteps=thinSteps)
-  
-  ## model comparison
-  # after running all models to fit the data, then compare models by BIC
-  message("models done, comparing models")
-  BIC = c(normal[[2]], monosomy[[2]], mitotic_trisomy[[2]], 
-          meiotic_trisomy[[2]], LOH[[2]])
-  BIC = sort(BIC,decreasing = F)
-  best_model = names(which.min(BIC))
-  selected = substr(best_model,5,nchar(best_model))
-  cat("Order and delta BIC of the preference of models\n")
-  delta_BIC = BIC-min(BIC)
-  print(delta_BIC)
-  cat(paste("model selected:",selected))
-  res = get(selected)
-  madseq = MadSeq(posterior=res[[1]],deltaBIC=delta_BIC)
-  madseq
+    else stop("the file type of 'hetero' is wrong, 
+                please provide the path to filtered heterozygous sites 
+                or the GRanges object containing filtered heterozygous sites!")
+    if(class(coverage)=="GRanges"){
+        target_cov=as.data.frame(coverage[seqnames(coverage)==target_chr])
+        data_coverage = target_cov$normed_depth
+        control_coverage = mean(target_cov$ref_depth,na.rm=TRUE)
+        auto_cov = coverage[seqnames(coverage)!="chrX"&
+                                seqnames(coverage)!="chrY"&
+                                seqnames(coverage)!="X"&
+                                seqnames(coverage)!="Y"]
+        auto_cov_mean = mean(mcols(auto_cov)$normed_depth,na.rm=TRUE)
+    }
+    else if(class(coverage)=="character"){
+        cov = read.table(coverage,header=TRUE,sep="\t")
+        target_cov = cov[cov$seqnames==target_chr,]
+        data_coverage = target_cov$normed_depth
+        control_coverage = mean(target_cov$ref_depth,na.rm=TRUE)
+        sample = strsplit(coverage,"_")[[1]][1]
+        auto_cov = cov[cov$seqnames!="chrX" & cov$seqnames!="chrY" & 
+                        cov$seqnames !="X" & cov$seqnames !="Y",]
+        auto_cov_mean = mean(auto_cov$normed_depth,na.rm=TRUE)
+    }
+    
+    ## if target chr is sex chromosomes, check the copy of sex chromosome
+    if(target_chr=="chrX"|target_chr=="X"){
+        chrX_cov_mean = mean(data_coverage)
+        ## if there is no heterozygous sites on chrX, 
+        ## and the coverage for chrX is much smaller than autosome
+        ## only one X chromosome
+        if(nrow(target_AAF)<20 & (chrX_cov_mean/auto_cov_mean)<0.75){
+            message("there is only one X chromosome")
+            return()
+        } 
+    }
+    else if (target_chr=="chrY"|target_chr=="Y"){
+        auto_cov = coverage[seqnames(coverage)!="chrX"&
+                                seqnames(coverage)!="chrY"&
+                                seqnames(coverage)!="X"&
+                                seqnames(coverage)!="Y"]
+        auto_cov_mean = mean(mcols(auto_cov)$normed_depth,na.rm=TRUE)
+        chrY_cov_mean = mean(data_coverage)
+        chrY_cov_len = length(data_coverage)
+        ## if there is no heterozygous sites on chrY
+        ## and no reads on chrY
+        ## no Y chromosome
+        if(nrow(target_AAF)<20&chrY_cov_len<50){
+            message("there is NO Y chromosome")
+            return()
+        }
+        else if (nrow(target_AAF)<20&(chrY_cov_mean/auto_cov_mean)<0.75){
+            message("there is one Y chromosome")
+            return()
+        }
+    }
+    
+    ## print the number of SNP and coverage information
+    message (paste("total number of heterozygous site:",nrow(target_AAF)))
+    message (paste("total number of coverage",length(data_coverage)))
+    
+    ## if plot is requested
+    if (plot == TRUE){
+        par(mfrow=c(1,1))
+        par(mar = c(5,4,4,2))
+        plotSites(target_AAF)
+        mtext(paste("data_coverage: ", round(mean(data_coverage)),
+                    ";control_coverage: ", round(control_coverage),sep=""),
+                side=1, line=-1)
+    }
+    
+    ## basic settings for MCMC
+    load.module("mix")
+    
+    ## run normal model
+    normal = runNormal(
+        target_AAF,
+        data_coverage,
+        control_coverage,
+        checkConvergence=checkConvergence,
+        adapt=adapt,
+        burnin=burnin,
+        nChain=nChain,
+        nStep=nStep,
+        thinSteps=thinSteps
+    )
+    
+    ## run monosomy model
+    monosomy = runMonosomy(
+        target_AAF,
+        data_coverage,
+        control_coverage,
+        checkConvergence=checkConvergence,
+        adapt=adapt,
+        burnin=burnin,
+        nChain=nChain,
+        nStep=nStep,
+        thinSteps=thinSteps
+        )
+    
+    ## run mitotic trisomy model
+    mitotic_trisomy = runMitoticTrisomy(
+        target_AAF,
+        data_coverage,
+        control_coverage,
+        checkConvergence=checkConvergence,
+        adapt=adapt,
+        burnin=burnin,
+        nChain=nChain,
+        nStep=nStep,
+        thinSteps=thinSteps
+        )
+    
+    ## run meiotic trisomy model
+    meiotic_trisomy = runMeioticTrisomy(
+        target_AAF,
+        data_coverage,
+        control_coverage,
+        checkConvergence=checkConvergence,
+        adapt=adapt,
+        burnin=burnin,
+        nChain=nChain,
+        nStep=nStep,
+        thinSteps=thinSteps
+        )
+    
+    ## run loss of heterozygosity
+    LOH = runLOH(
+        target_AAF,
+        data_coverage,
+        control_coverage,
+        checkConvergence=checkConvergence,
+        adapt=adapt,burnin=burnin,nChain=nChain,
+        nStep=nStep,thinSteps=thinSteps
+        )
+    
+    ## model comparison
+    # after running all models to fit the data, then compare models by BIC
+    message("models done, comparing models")
+    BIC = c(normal[[2]], monosomy[[2]], mitotic_trisomy[[2]], 
+            meiotic_trisomy[[2]], LOH[[2]])
+    BIC = sort(BIC,decreasing = FALSE)
+    best_model = names(which.min(BIC))
+    selected = substr(best_model,5,nchar(best_model))
+    cat("Order and delta BIC of the preference of models\n")
+    delta_BIC = BIC-min(BIC)
+    print(delta_BIC)
+    cat(paste("model selected:",selected))
+    res = get(selected)
+    madseq = MadSeq(posterior=res[[1]],deltaBIC=delta_BIC)
+    madseq
 }
-
-

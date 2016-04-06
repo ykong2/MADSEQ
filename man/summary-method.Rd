@@ -12,8 +12,19 @@
 \item{object}{A \code{MadSeq} object returned by \code{\link{runMadSeq}} 
 function}
 }
+\value{
+a \code{table} containing statistics for each parameters in the 
+selected model
+}
 \description{
 An S4 method to summarize statistics for \code{\link{MadSeq}} object
+}
+\examples{
+## load the example MadSeq object come with the package
+data("aneuploidy_chr18")
+
+## show statistics
+summary(aneuploidy_chr18)
 }
 \author{
 Yu Kong
