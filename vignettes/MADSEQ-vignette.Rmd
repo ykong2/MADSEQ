@@ -19,20 +19,21 @@ quantification of mosaic aneuploidy:
 1. The distribution of the alternative allele frequencies (AAF) of the sites 
 that are genotyped as heterozygous.
 1. The average sequencing coverage for regions. (for targeted sequencing it's 
-each targeted region; for whole genome sequencing, bin the genome into bins. And
-because sequencing coverage are usually biased by GC content, normalization is
-necessary, the normalization function is provided in the package).
+each targeted region; for whole genome sequencing, bin the genome into bins. 
+And because sequencing coverage are usually biased by GC content, normalization
+is necessary, the normalization function is provided in the package).
 
 
-MADSEQ works on the whole chromosome resolution. It applies all of the five models
-(normal, monosomy, mitotic trisomy, meiotic trisomy, loss of heterozygosity) to 
-fit the distribution of the AAF of all the heterozygous sites, and fit the 
-distribution of the coverage from that chromosome. After fitting the same data 
-using all models, it does model comparison using BIC (Bayesian Information 
-Criteria) to select the best model. The model selected tells us whether the 
-chromosome is aneuploid or not, and also the type of mosaic aneuploidy. 
-Then, from the posterior distribution of the best model, we could get the 
-estimation of the fraction of aneuploidy cells.
+MADSEQ works on the whole chromosome resolution. It applies all of the five 
+models (normal, monosomy, mitotic trisomy, meiotic trisomy, 
+loss of heterozygosity) to fit the distribution of the AAF of all the 
+heterozygous sites, and fit the distribution of the coverage from that 
+chromosome. After fitting the same data using all models, it does model 
+comparison using BIC (Bayesian Information Criteria) to select the best model.
+The model selected tells us whether the chromosome is aneuploid or not,
+and also the type of mosaic aneuploidy. Then, from the posterior distribution 
+of the best model, we could get the estimation of the fraction of 
+aneuploidy cells.
 
 ## Data You Need
 
@@ -43,9 +44,9 @@ estimation of the fraction of aneuploidy cells.
     [here](http://www.htslib.org/)). 
     * The FORMAT section of the vcf file should contain depth (DP) and allelic 
     depth (AD) field.
-* A __bed__ file containing targeted regions: if it's targeted sequencing data, then
-  the bed file contatining targeted regions; if it's whole genome sequencing, 
-  bin the whole genome into equal size bins (i.e. 500kb).
+* A __bed__ file containing targeted regions: if it's targeted sequencing data,
+  then the bed file contatining targeted regions; if it's whole genome 
+  sequencing, bin the whole genome into equal size bins (i.e. 500kb).
 
 **Note:** Currently our package only supports one bam and one vcf file per 
 sample. If you have more than one sample, please prepare multiple bam and vcf 
@@ -56,8 +57,8 @@ files for each of them.
 
 There are two sets of example data come with the package:
 
-1. A bam file named __aneuploidy.bam__ and a vcf file names __aneuploidy.vcf.gz__
-   for a sample containing trisomy in chromosome 18. 
+1. A bam file named __aneuploidy.bam__ and a vcf file named
+   __aneuploidy.vcf.gz__ for a sample containing trisomy in chromosome 18. 
 2. A bam file named __normal.bam__ and a vcf file names __normal.vcf.gz__
    for a normal sample.
 3. A bed file named __target.bed__ containing the targeted regions.
@@ -71,7 +72,7 @@ To access the data use
 system.file("extdata","aneuploidy.bam",package="MADSEQ")
 system.file("extdata","aneuploidy.vcf.gz",package="MADSEQ")
 ```
-__Note__: This is just a set of example data, only contains a very little region
+__Note__:This is just a set of example data, only contains a very little region
 of the genome.
 
 ## Use The Package
@@ -93,15 +94,19 @@ aneuploidy_bam = system.file("extdata","aneuploidy.bam",package="MADSEQ")
 normal_bam = system.file("extdata","normal.bam",package="MADSEQ")
 target = system.file("extdata","target.bed",package="MADSEQ")
 
-## Note: for your own data, just specify the path to the location of your file
-## using character.
+## Note: for your own data, just specify the path to the location 
+## of your file using character.
 
 ## prepare coverage and GC content for each targeted region
 # aneuploidy sample
-aneuploidy_cov = prepareCoverageGC(target_bed=target, bam=aneuploidy_bam, "hg19")
+aneuploidy_cov = prepareCoverageGC(target_bed=target, 
+                                    bam=aneuploidy_bam, 
+                                    "hg19")
 
 # normal sample
-normal_cov = prepareCoverageGC(target_bed=target, bam=normal_bam, "hg19")
+normal_cov = prepareCoverageGC(target_bed=target, 
+                                bam=normal_bam, 
+                                "hg19")
 
 ## view the first two rows of prepared coverage data (A GRanges Object)
 aneuploidy_cov[1:2]
@@ -115,35 +120,37 @@ The normalization function takes prepared coverage GRanges object from
 __prepareCoverageGC__ function, normalize the coverage and calculate the 
 expected coverage for the sample.
 If there is only one sample, the function will correct the coverage by GC 
-content, and take the average coverage for the whole genome as expected coverage. 
-If there are more than one samples given, the function will first quantile 
-normalize coverage across samples, then correct the coverage by GC for each 
-sample. If control sample is not specified, the expected coverage is the median 
-coverage across all samples, if a normal control is specified, the average 
-coverage for control sample is taken as expected coverage for further analysis.
+content, and take the average coverage for the whole genome as expected 
+coverage. If there are more than one samples given, the function will first 
+quantile normalize coverage across samples, then correct the coverage by GC for
+each sample. If control sample is not specified, the expected coverage is the 
+median coverage across all samples, if a normal control is specified, the 
+average coverage for control sample is taken as expected coverage for further 
+analysis.
 
 __Note:__ 
 
 1. If you have more than one samples, please make sure they are targeted
 by the same regions.
 2. If you have more than one samples, please separate female samples and male
-samples, which means normalize them separately; because sex chromosomes can bias
-the normalization.
-3. One sample is good to go, however multiple samples will help you get a better 
-normalization.
+samples, which means normalize them separately; because sex chromosomes can 
+bias the normalization.
+3. One sample is good to go, however multiple samples will help you get a 
+better normalization.
 
 #### If you only have one sample
   _If you choose to write the output to file (recommended)_
 ```{r}
 ## normalize coverage data
-## I set plot=F here because similar plot will show in the following example
-normalizeCoverage(aneuploidy_cov,writeToFile = T, destination = ".",plot=F)
+## set plot=FALSE here because similar plot will show in the following example
+normalizeCoverage(aneuploidy_cov,writeToFile=TRUE, destination=".",plot=FALSE)
 ```
 
   _If you don't want to write output to file_
 ```{r}
 ## normalize coverage data
-aneuploidy_normed = normalizeCoverage(aneuploidy_cov,writeToFile = F,plot=F)
+aneuploidy_normed = normalizeCoverage(aneuploidy_cov,writeToFile=FALSE,
+                                      plot=FALSE)
 
 ## a GRangesList object will be produced by the function, look at it by
 names(aneuploidy_normed)
@@ -155,14 +162,14 @@ aneuploidy_normed[["aneuploidy_cov"]]
 ```{r}
 ## normalize coverage data
 normalizeCoverage(aneuploidy_cov, normal_cov,
-                  writeToFile = T, destination = ".", plot=F)
+                  writeToFile =TRUE, destination = ".", plot=FALSE)
 ```
 
   _If you don't want to write output to file_
 ```{r,fig.height=6, fig.width=6,fig.align='center'}
 ## normalize coverage data
 normed_without_control = normalizeCoverage(aneuploidy_cov, normal_cov, 
-                                           writeToFile = F, plot=T)
+                                           writeToFile=FALSE, plot=TRUE)
 
 ## a GRangesList object will be produced by the function
 length(normed_without_control)
@@ -178,13 +185,13 @@ normed_without_control[["normal_cov"]]
 ```{r}
 ## normalize coverage data, normal_cov is the control sample
 normalizeCoverage(aneuploidy_cov, control=normal_cov,
-                  writeToFile = T, destination = ".",plot=F)
+                  writeToFile=TRUE, destination = ".",plot=FALSE)
 ```
 
   _If you don't want to write output to file_
 ```{r}
 normed_with_control = normalizeCoverage(aneuploidy_cov, control=normal_cov, 
-                                        writeToFile = F, plot=F)
+                                        writeToFile =FALSE, plot=FALSE)
 
 ## a GRangesList object will be produced by the function
 length(normed_without_control)
@@ -204,11 +211,11 @@ aneuploidy_vcf = system.file("extdata","aneuploidy.vcf.gz",package="MADSEQ")
 
 ## If you choose to write the output to file (recommended)
 prepareHetero(aneuploidy_vcf, target_bed=target, genome="hg19", 
-              writeToFile=T, destination=".")
+              writeToFile=TRUE, destination=".")
 
 ## If you don't want to write output to file
 aneuploidy_hetero = prepareHetero(aneuploidy_vcf, target_bed=target, 
-                                  genome="hg19", writeToFile=F)
+                                  genome="hg19", writeToFile=FALSE)
 
 ```
 
@@ -227,7 +234,7 @@ can be very long. Running different chromosomes parallel in background or High
 Performance Computer Cluster is highly recommended.
 
 
-#### If the normalized coverage and processed heterozygous sites have been written into files 
+#### If the processed data have been written into files 
 ```{r,fig.height=4, fig.width=6,fig.align='center'}
 ## specify the path to processed files
 aneuploidy_hetero = "./aneuploidy.vcf.gz_filtered_heterozygous.txt"
@@ -247,9 +254,10 @@ __Note:__ In order to save time, we only run 1 chain with a much less steps
 compared with default settings. For real cases, the default settings are
 recommended.
 
-#### If the normalized coverage and processed heterozygous sites have __NOT__ been written into files
+#### If the processed data have __NOT__ been written into files
 ```{r,eval=FALSE}
-## subset normalized coverage for aneuploidy sample from the GRangesList returned by normalizeCoverage function
+## subset normalized coverage for aneuploidy sample from the GRangesList 
+## returned by normalizeCoverage function
 aneuploidy_normed_cov = normed_with_control[["aneuploidy_cov"]]
 
 ## run the model
@@ -271,7 +279,8 @@ selected model against other models. It can be summarized as
 
 ```{r,echo=FALSE,warning=FALSE}
 BIC = c("[0,2]","(2,6]","(6,10]",">10")
-evidence = c("Not worth more than a bare mention","Positive","Strong","Very Strong")
+evidence = c("Not worth more than a bare mention","Positive",
+             "Strong","Very Strong")
 table = data.frame(BIC,evidence)
 library(knitr)
 kable(table,col.names =c("deltaBIC","Evidence against higher BIC") ,align="c")
@@ -292,7 +301,7 @@ plotFraction(aneuploidy_chr18, prob=0.95)
 ```
 
 ```{r, fig.height=4, fig.width=5,fig.align='center'}
-## plot the distribution of AAF for heterozygous sites as estimated by the model
+## plot the distribution of AAF as estimated by the model
 plotMixture(aneuploidy_chr18)
 ```
 
@@ -302,21 +311,35 @@ parameters = c("f","m","mu[1]","mu[2]","mu[3] (LOH model)",
                "mu[3] (meiotic trisomy model)","mu[4]","kappa","p[1]","p[2]",
                "p[3]","p[4]","p[5]","m_cov","p_cov","r_cov")
 explains = c("Fraction of mosaic aneuploidy",
-             "The midpoint of the alternative allele frequency (AAF) for all heterozygous sites",
-             "Mean AAF of mixture 1: the AAFs of this mixture shifted from midpoint to some higher values", 
-             "Mean AAF of mixture 2: the AAFs of this mixture shifted from midpoint to some lower values",
-             "Mean AAF of mixture 3: In LOH model, mu[3] indicates normal sites without loss of heterozygosity",
-             "Mean AAF of mixture 3: In meiotic model, the AAFs of this mixture shifted from 0 to some higher value",
-             "Mean AAF of mixture 4: the AAFs of this mixture shifted from 1 to some lower value (only in meiotic model)",
-             "Indicate variance of the AAF mixtures: larger kappa means smaller variance",
-             "Weight of mixture 1: indicate the proportion of heterozygous sites in the mixture 1",
-             "Weight of mixture 2: indicate the proportion of heterozygous sites in the mixture 2",
-             "Weight of mixture 3: indicate the proportion of heterozygous sites in the mixture 3 (only in LOH and meiotic model)",
-             "Weight of mixture 4: indicate the proportion of heterozygous sites in the mixture 4 (only in meiotic model)",
-             "Weight of outlier component: the AAF of 1% sites might not well behaved, so these sites are treated as noise.",
-             "Mean coverage of all the sites from the chromosome, estimated from a negative binomial distribution",
+             "The midpoint of the alternative allele frequency (AAF) 
+             for all heterozygous sites",
+             "Mean AAF of mixture 1: the AAFs of this mixture shifted 
+             from midpoint to some higher values", 
+             "Mean AAF of mixture 2: the AAFs of this mixture shifted 
+             from midpoint to some lower values",
+             "Mean AAF of mixture 3: In LOH model, mu[3] indicates normal 
+             sites without loss of heterozygosity",
+             "Mean AAF of mixture 3: In meiotic model, the AAFs of this 
+             mixture shifted from 0 to some higher value",
+             "Mean AAF of mixture 4: the AAFs of this mixture shifted 
+             from 1 to some lower value (only in meiotic model)",
+             "Indicate variance of the AAF mixtures: 
+             larger kappa means smaller variance",
+             "Weight of mixture 1: indicate the proportion of 
+             heterozygous sites in the mixture 1",
+             "Weight of mixture 2: indicate the proportion of 
+             heterozygous sites in the mixture 2",
+             "Weight of mixture 3: indicate the proportion of heterozygous 
+             sites in the mixture 3 (only in LOH and meiotic model)",
+             "Weight of mixture 4: indicate the proportion of heterozygous 
+             sites in the mixture 4 (only in meiotic model)",
+             "Weight of outlier component: the AAF of 1% sites might 
+             not well behaved, so these sites are treated as noise.",
+             "Mean coverage of all the sites from the chromosome, 
+             estimated from a negative binomial distribution",
              "Prob of the negative binomial distribution for the coverage",
-             "Another parameter (r) for the negative binomial disbribution of the coverage, small r means large variance")
+             "Another parameter (r) for the negative binomial disbribution 
+             of the coverage, small r means large variance")
 table = data.frame(parameters,explains)
 kable(table,col.names =c("parameters","description") ,align="c")
 ```
