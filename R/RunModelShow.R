@@ -15,7 +15,7 @@
 #' coverage table returned by \code{\link{normalizeCoverage}} function, or A 
 #' \code{GRanges} object from the \code{GRangesList} returned by 
 #' \code{\link{normalizeCoverage}} function. Look up your sample by 
-#' \code{names(GRangesList)}, and subset your the normalized coverage for your 
+#' \code{names(GRangesList)}, and subset your the normalized coverage for your
 #' sample by \code{GRangesList["sample_name"]}. For more details, please check
 #' the example.
 #' @param target_chr A \code{character} specify the chromosome number you want
@@ -23,7 +23,7 @@
 #' or "1" accordingly.
 #' @param adapt A \code{integer} indicate the adaption steps for the MCMC 
 #' sampling. Default: 10000
-#' @param burnin A \code{integer} indicate burnin steps for the MCMC sampling. 
+#' @param burnin A \code{integer} indicate burnin steps for the MCMC sampling.
 #' Default: 10000. If the posterior distribution is not converged, increasing 
 #' burnin steps can be helpful.
 #' @param nChain A \code{integer} indicate the number of chains for 
@@ -85,8 +85,8 @@
 #' ## (to speed up the example, we only run one chain and less steps here, 
 #' ##  but default settings are recommended in real case)
 #' aneuploidy_chr18 = runMadSeq(aneuploidy_hetero, aneuploidy_normed_cov,
-#'                              target_chr="chr18", adapt=3000, burnin=3000,
-#'                              nChain =1, nStep = 5000, thinSteps=1)
+#'                              target_chr="chr18", adapt=100, burnin=200,
+#'                              nChain =1, nStep = 1000, thinSteps=1)
 #' @references Martyn Plummer (2016). rjags: Bayesian Graphical Models using 
 #' MCMC. R package version 4-6. \cr
 #' \url{https://CRAN.R-project.org/package=rjags}
@@ -94,6 +94,9 @@
 #' @import coda
 #' @importFrom VGAM dbetabinom.ab
 #' @import GenomicRanges
+#' @importFrom stats dnbinom
+#' @importFrom utils read.table
+#' @importFrom graphics plot abline par mtext
 #' @export
 #' @seealso \code{\link{MadSeq}}, \code{\link{plotMadSeq}},
 #'  \code{\link{plotFraction}}, \code{\link{plotMixture}}
@@ -193,6 +196,12 @@ runMadSeq = function(
     ## basic settings for MCMC
     load.module("mix")
     
+    ## check arch of the platform
+    if(length(grep("i386",R.Version()$arch))>0){
+        message("please check the JAGS model, 
+                make sure you are using JAGS-4.2.0-Rtools33.exe")
+        return(NULL)
+    }
     ## run normal model
     normal = runNormal(
         target_AAF,

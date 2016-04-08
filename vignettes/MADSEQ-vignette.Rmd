@@ -9,7 +9,7 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
-The MADSEQ package is a group of hierarchical Bayesian model for the detection 
+The MADSEQ package is a group of hierarchical Bayesian model for the detection
 and quantification of potential mosaic aneuploidy in sample using massive
 parallel sequencing data. 
 
@@ -244,8 +244,8 @@ aneuploidy_normed_cov = "./aneuploidy_cov_normed_depth.txt"
 aneuploidy_chr18 = runMadSeq(hetero=aneuploidy_hetero, 
                              coverage=aneuploidy_normed_cov, 
                              target_chr="chr18",
-                             nChain=1, nStep=5000, thinSteps=1,
-                             adapt=5000,burnin=5000)
+                             nChain=1, nStep=1000, thinSteps=1,
+                             adapt=100,burnin=200)
 
 ## An MadSeq object will be returned
 aneuploidy_chr18

@@ -30,7 +30,7 @@ getCoverage = function(
     target_bed, 
     genome_assembly="hg19"){
     ## read in target bed table
-    target = read.table(target_bed,sep="\t",header=FALSE)
+    target = utils::read.table(target_bed,sep="\t",header=FALSE)
     ## prepare GRanges object for input bed file
     target_gr = GenomicRanges::GRanges(seqnames=Rle(target[,1]), 
                                         ranges=IRanges(start=target[,2]+1,
@@ -134,7 +134,7 @@ correctGCBias = function(
     gc_coverage = data.frame(round_gc = as.numeric(names(coverage_by_gc)),
                             mean_reads = coverage_by_gc)
     ## fit coverage and GC content by loess
-    gc_coverage_fit = loess(gc_coverage$mean_reads~gc_coverage$round_gc,
+    gc_coverage_fit = stats::loess(gc_coverage$mean_reads~gc_coverage$round_gc,
                             span=0.5)
     ## the expected coverage is the mean of the raw coverage
     expected_coverage = mean(gc_depth[,"coverage"])
@@ -147,10 +147,10 @@ correctGCBias = function(
             ylim = c(0,1.5*quantile(gc_coverage$mean_reads,0.95,na.rm=TRUE)),
             xlab = "GC content", ylab = "raw reads", 
             main = "GC vs Coverage Before Norm",cex.main=0.8)
-        lines(gc_coverage$round_gc, 
+        graphics::lines(gc_coverage$round_gc, 
             stats::predict(gc_coverage_fit, gc_coverage$round_gc), 
             col = "red", lwd = 2)
-        abline(h = expected_coverage, lwd = 2, col = "grey", lty = 3)
+        graphics::abline(h = expected_coverage, lwd = 2, col = "grey", lty = 3)
     }
     
     ## correct reads by loess fit
@@ -193,7 +193,7 @@ correctGCBias = function(
     gc_coverage_after=data.frame(round_gc=
                                     as.numeric(names(coverage_by_gc_after)),
                                 mean_reads=coverage_by_gc_after)
-    gc_coverage_fit_after = loess(gc_coverage_after$mean_reads
+    gc_coverage_fit_after = stats::loess(gc_coverage_after$mean_reads
                                 ~gc_coverage_after$round_gc,span=0.5)
     
     ## plot GC vs coverage after normalization
@@ -205,7 +205,7 @@ correctGCBias = function(
                                     na.rm=TRUE)),
             xlab = "GC content", ylab = "normalized reads", 
             main = "GC vs Coverage After Norm",cex.main=0.8)
-        lines(gc_coverage_after$round_gc, 
+        graphics::lines(gc_coverage_after$round_gc, 
             stats::predict(gc_coverage_fit_after, gc_coverage_after$round_gc),
             col = "red", lwd = 2)
     }
@@ -276,7 +276,7 @@ calculateNormedCoverage = function(
     
     ## if plot requested, then plot 
     if (plot == TRUE){
-        par(mfrow=c(ifelse(nSample>1,3,2),1))
+        graphics::par(mfrow=c(ifelse(nSample>1,3,2),1))
         ## calculate average coverage before normalization
         before_chr = NULL
         quantiled_chr = NULL
@@ -292,18 +292,18 @@ calculateNormedCoverage = function(
             }
         }
         ## plot
-        cols = sample(colors(),nSample)
+        cols = sample(grDevices::colors(),nSample)
         nChr = ncol(after_chr)
         ## 1. plot raw coverage
         plot(1:nChr,rep(1,nChr),type="n",
             ylim=c(0.5*min(before_chr),1.5*max(before_chr)),
             xlab="chromosome",ylab="average coverage",
             main = "raw data",xaxt="n")
-        axis(1,at=seq(1,nChr),chr_name[1:nChr],las=2)
+        graphics::axis(1,at=seq(1,nChr),chr_name[1:nChr],las=2)
         for (i in 1:nSample){
-            lines(1:nChr,before_chr[i,],type="b",pch=16,col=cols[i])
+            graphics::lines(1:nChr,before_chr[i,],type="b",pch=16,col=cols[i])
         }
-        legend("topright",sample_name,pch=16,col=cols)
+        graphics::legend("topright",sample_name,pch=16,col=cols)
         
         if(nSample>1){
             ## 2. plot quantiled coverage
@@ -311,22 +311,23 @@ calculateNormedCoverage = function(
                 ylim=c(0.5*min(quantiled_chr),1.5*max(quantiled_chr)),
                 xlab="chromosome",ylab="average coverage",
                 main="quantile normalized")
-            axis(1,at=seq(1,nChr),chr_name[1:nChr],las=2)
+            graphics::axis(1,at=seq(1,nChr),chr_name[1:nChr],las=2)
             for (i in 1:nSample){
-                lines(1:nChr,quantiled_chr[i,],type="b",pch=16,col=cols[i])
+                graphics::lines(1:nChr,quantiled_chr[i,],type="b",
+                                pch=16,col=cols[i])
             }
-            legend("topright",sample_name,pch=16,col=cols)
+            graphics::legend("topright",sample_name,pch=16,col=cols)
         }
         
         ## 3. plot normed coverage
         plot(1:nChr,rep(1,nChr),type="n",xaxt="n",
             ylim=c(0.5*min(after_chr),1.5*max(after_chr)),
             xlab="chromosome",ylab="average coverage",main="GC normalized")
-        axis(1,at=seq(1,nChr),chr_name[1:nChr],las=2)
+        graphics::axis(1,at=seq(1,nChr),chr_name[1:nChr],las=2)
         for (i in 1:nSample){
-            lines(1:nChr,after_chr[i,],type="b",pch=16,col=cols[i])
+            graphics::lines(1:nChr,after_chr[i,],type="b",pch=16,col=cols[i])
         }
-        legend("topright",sample_name,pch=16,col=cols)
+        graphics::legend("topright",sample_name,pch=16,col=cols)
     }
     after_chr
 }

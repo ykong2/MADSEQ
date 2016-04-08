@@ -17,6 +17,8 @@
 #' @seealso \code{\link{runMadSeq}}, \code{\link{plotFraction}}, 
 #' \code{\link{plotMixture}}
 #' @author Yu Kong
+#' @importFrom graphics plot hist par
+#' @importFrom stats density
 #' @export
 setMethod(
     "plotMadSeq",
@@ -34,7 +36,7 @@ setMethod(
                     main=paste("posterior",i),xlab="")
             }
             else{
-                plot(density(tmp_dat), xlab="", lwd=2, col="blue",
+                plot(stats::density(tmp_dat), xlab="", lwd=2, col="blue",
                     main=paste("posterior",i))
             }
         }
@@ -65,6 +67,9 @@ setMethod(
 #' \code{\link{plotMixture}}
 #' @author Yu Kong
 #' @export
+#' @importFrom graphics lines hist text par
+#' @importFrom grDevices rgb
+#' @importFrom stats density
 setMethod(
     "plotFraction",
     signature = "MadSeq",
@@ -72,7 +77,7 @@ setMethod(
         if(is.element("f",colnames(object@posterior))){
             par(mfrow=c(1,1))
             f = object@posterior[,"f"]
-            f_density = density(f)
+            f_density = stats::density(f)
             y_max = max(hist(f,breaks=40,plot=FALSE)$density)
             f_mean = signif(mean(f),2)
             f_HDI = signif(HDIofMCMC(f,credMass = prob),2)
@@ -115,6 +120,8 @@ setMethod(
 #' @seealso \code{\link{runMadSeq}}, \code{\link{plotMadSeq}}, 
 #' \code{\link{plotFraction}}
 #' @author Yu Kong
+#' @importFrom graphics curve text par
+#' @importFrom stats dbeta
 #' @export
 setMethod(
     "plotMixture",

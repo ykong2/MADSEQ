@@ -17,7 +17,7 @@ heterozygous table returned by \code{\link{prepareHetero}} function, or A
 coverage table returned by \code{\link{normalizeCoverage}} function, or A 
 \code{GRanges} object from the \code{GRangesList} returned by 
 \code{\link{normalizeCoverage}} function. Look up your sample by 
-\code{names(GRangesList)}, and subset your the normalized coverage for your 
+\code{names(GRangesList)}, and subset your the normalized coverage for your
 sample by \code{GRangesList["sample_name"]}. For more details, please check
 the example.}
 
@@ -28,7 +28,7 @@ or "1" accordingly.}
 \item{adapt}{A \code{integer} indicate the adaption steps for the MCMC 
 sampling. Default: 10000}
 
-\item{burnin}{A \code{integer} indicate burnin steps for the MCMC sampling. 
+\item{burnin}{A \code{integer} indicate burnin steps for the MCMC sampling.
 Default: 10000. If the posterior distribution is not converged, increasing 
 burnin steps can be helpful.}
 
@@ -107,8 +107,8 @@ aneuploidy_normed_cov = normed[["aneuploidy_cov_gc"]]
 ## (to speed up the example, we only run one chain and less steps here, 
 ##  but default settings are recommended in real case)
 aneuploidy_chr18 = runMadSeq(aneuploidy_hetero, aneuploidy_normed_cov,
-                             target_chr="chr18", adapt=3000, burnin=3000,
-                             nChain =1, nStep = 5000, thinSteps=1)
+                             target_chr="chr18", adapt=100, burnin=200,
+                             nChain =1, nStep = 1000, thinSteps=1)
 }
 \author{
 Yu Kong

@@ -28,7 +28,6 @@
 #' @seealso \code{\link{normalizeCoverage}}
 #' @author Yu Kong
 #' @import Rsamtools
-#' @import BiocGenerics
 #' @import GenomicAlignments
 #' @import GenomicRanges
 #' @import IRanges
@@ -36,8 +35,8 @@
 #' @import Biostrings
 #' @import BSgenome
 #' @import BSgenome.Hsapiens.UCSC.hg19
-#' @import BiocGenerics
 #' @import methods
+#' @importFrom utils read.table
 #' @export
 prepareCoverageGC = function(
     target_bed, 
@@ -175,6 +174,10 @@ prepareCoverageGC = function(
 #' Personalized copy number and segmental duplication maps using 
 #' next-generation sequencing. Nature Genetics, 41(10):1061-7.
 #' @importFrom preprocessCore normalize.quantiles
+#' @importFrom graphics abline axis curve hist legend lines mtext par plot text
+#' @importFrom grDevices colors rgb
+#' @importFrom stats loess
+#' @importFrom utils write.table
 #' @export
 normalizeCoverage = function(
     object,...,control=NULL,
@@ -199,7 +202,7 @@ normalizeCoverage = function(
     message(paste("there are",nSample,"samples"))
     
     ## check if all the samples have the same number of targeted region
-    if (length(unique(elementLengths(data)))>1){
+    if (length(unique(sapply(data,length)))>1){
         cat(elementLengths(data))
         stop("the number of targeted region is different in your samples, 
             please check your input")
@@ -330,6 +333,8 @@ normalizeCoverage = function(
 #' @import BSgenome
 #' @import GenomicRanges
 #' @import IRanges
+#' @importFrom SummarizedExperiment rowRanges
+#' @importFrom utils write.table
 #' @export
 prepareHetero = function(
     vcffile,
@@ -358,7 +363,7 @@ prepareHetero = function(
                     destination=des_vcf)
     dat = readVcf(des_vcf,genome=genome)
     unlink(des_vcf)
-    res = rowRanges(dat)
+    res = SummarizedExperiment::rowRanges(dat)
     gt = unname(geno(dat)$GT[,1])
     dp = unname(geno(dat)$DP[,1])
     ad = ad = geno(dat)$AD

@@ -407,7 +407,7 @@ log_likelihood_one = function(
     p_cov = parameter["p_cov"]
     log_cov = 0
     for (i in 1:length(N_cov)){
-        sub_log_cov = dnbinom(N_cov[i],size=r_cov,prob=p_cov,log=TRUE)
+        sub_log_cov = stats::dnbinom(N_cov[i],size=r_cov,prob=p_cov,log=TRUE)
         log_cov = log_cov + sub_log_cov
     }
     #print(log_cov)
@@ -444,7 +444,7 @@ log_likelihood_two = function(
     p_cov = parameter["p_cov"]
     log_cov = 0
     for (i in 1:length(N_cov)){
-        sub_log_cov = dnbinom(N_cov[i],size=r_cov,prob=p_cov,log=TRUE)
+        sub_log_cov = stats::dnbinom(N_cov[i],size=r_cov,prob=p_cov,log=TRUE)
         log_cov = log_cov + sub_log_cov
     }
     log_sum = loglike_aaf +log_cov
@@ -491,7 +491,7 @@ log_likelihood_four = function(
     p_cov = parameter["p_cov"]
     log_cov = 0
     for (i in 1:length(N_cov)){
-        sub_log_cov = dnbinom(N_cov[i],size=r_cov,prob=p_cov,log=TRUE)
+        sub_log_cov = stats::dnbinom(N_cov[i],size=r_cov,prob=p_cov,log=TRUE)
         log_cov = log_cov + sub_log_cov
     }
     
@@ -532,7 +532,7 @@ log_likelihood_UPD = function(
     p_cov = parameter["p_cov"]
     log_cov = 0
     for (i in 1:length(N_cov)){
-        sub_log_cov = dnbinom(N_cov[i],size=r_cov,prob=p_cov,log=TRUE)
+        sub_log_cov = stats::dnbinom(N_cov[i],size=r_cov,prob=p_cov,log=TRUE)
         log_cov = log_cov + sub_log_cov
     }
     log_sum = loglike_aaf +log_cov
