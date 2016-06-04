@@ -1,0 +1,40 @@
+model{
+for (i in 1:nSNP){
+# likelihood
+z[i] ~ dbetabin(a[mixture[i]],b[mixture[i]],N[i])
+mixture[i] ~ dcat(p[1:Nclust])
+}
+# hyperprior
+for (clustID in 1:(Nclust-1)){
+a[clustID] <- mu[clustID]*kappa
+b[clustID] <- (1-mu[clustID])*kappa
+}
+
+for (i in 1:nSites){
+# likelihood
+N_cov[i] ~ dnegbin(p_cov,r_cov)
+}
+#prior for coverage
+p_cov <- r_cov/(m_cov+r_cov)
+m_cov <- m0*(2+f)/2
+r_cov ~ dgamma(0.01,0.01)
+
+#prior for AAF
+f ~ dbeta(1,1)
+kappa ~ dgamma(1,0.1)
+p[3] ~ dbeta(1,1)I(0.1,0.25)
+p[4] <- p[3]
+p[1] <- 0.495-p[4]
+p[2] <- 0.495-p[3]
+p[5] <- 0.01
+a[5] <- 1
+b[5] <- 1
+d1 <- m*f*(1-m)/(1+m*f)
+d2 <- m*f*(1-m)/(1+f-m*f)
+d3 <- m*f/(2*(1-m)+m*f)
+d4 <- f*(1-m)/(f*(1-m)+2*m)
+mu[1] <- m+d1
+mu[2] <- m-d2
+mu[3] <- 0+d3
+mu[4] <- 1-d4
+}

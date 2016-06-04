@@ -1,0 +1,31 @@
+Package: MADSEQ
+Type: Package
+Title: Mosaic Aneuploidy Detection and Quantification using Massive
+        Parallel Sequencing Data
+Version: 0.99.9
+Date: 2016-04-05
+Author:
+        person("Yu","Kong",email="yu.kong@phd.einstein.yu.edu",role=c("aut","cre"))
+Maintainer: Yu Kong <yu.kong@phd.einstein.yu.edu>
+Description: The MADSEQ package provides a group of hierarchical
+        Bayeisan models for the detection of mosaic aneuploidy, the
+        inference of the type of aneuploidy and also for the
+        quantification of the fraction of aneuploid cells in the
+        sample.
+License: GPL(>=2)
+SystemRequirements: JAGS(>=4.2.0)http://mcmc-jags.sourceforge.net/
+Depends: R(>= 3.3), rjags(>= 4-6),
+Suggests: knitr
+VignetteBuilder: knitr
+LazyData: True
+Imports: VGAM, coda, BSgenome, BSgenome.Hsapiens.UCSC.hg19, S4Vectors,
+        methods, preprocessCore, GenomicAlignments, Rsamtools,
+        Biostrings, GenomicRanges, IRanges, VariantAnnotation,
+        SummarizedExperiment, GenomeInfoDb, rtracklayer, graphics,
+        stats, grDevices, utils
+biocViews: GenomicVariation, SomaticMutation, VariantDetection,
+        Bayesian, CopyNumberVariation, Sequencing, Coverage
+URL: https://github.com/ykong2/MADSEQ
+BugReports: https://github.com/ykong2/MADSEQ/issues
+RoxygenNote: 5.0.1
+NeedsCompilation: no
