@@ -273,6 +273,8 @@ runMadSeq = function(
     message("models done, comparing models")
     BIC = c(normal[[2]], monosomy[[2]], mitotic_trisomy[[2]], 
             meiotic_trisomy[[2]], LOH[[2]])
+    # add 10 penalty other comlicated models to get confident results
+    BIC = c(BIC[1],BIC[2:5]+10)
     BIC = sort(BIC,decreasing = FALSE)
     best_model = names(which.min(BIC))
     selected = substr(best_model,5,nchar(best_model))
