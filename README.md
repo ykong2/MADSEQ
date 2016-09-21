@@ -10,6 +10,10 @@ MADSEQ-R package for mosaic aneuploidy detection
 * R package: [rjags](https://cran.r-project.org/web/packages/rjags/index.html), or visit their [GitHub](https://github.com/cran/rjags)
 
 ## Install 
+```{r}
+source("https://bioconductor.org/biocLite.R")
+biocLite("MADSEQ")
+```
 
 ###Install from GitHub
 ```{r}

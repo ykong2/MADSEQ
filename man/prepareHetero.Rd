@@ -14,7 +14,7 @@ by \code{bgzip}. The tool is part of \code{tabix} package,
 can be download from \url{http://www.htslib.org/}}
 
 \item{target_bed}{A \code{character}, specify the path to the location of
-the bed file containing targeted regions.}
+bed file containing targeted regions.}
 
 \item{genome}{A \code{character}, specify the assembly of your genome. 
 Default: hg19. To see available genome assembly, 
@@ -48,15 +48,12 @@ FORMAT field
 \examples{
 ## specify the path to the vcf.gz file for the aneuploidy sample
 aneuploidy_vcf=system.file("extdata","aneuploidy.vcf.gz",package="MADSEQ")
-
-## specify the path to the bed file containing targeted region
 target = system.file("extdata","target.bed",package="MADSEQ")
-
 ##------ if not write to file ------
-aneuploidy_hetero=prepareHetero(aneuploidy_vcf, target, writeToFile=FALSE)
+aneuploidy_hetero=prepareHetero(aneuploidy_vcf,target,writeToFile=FALSE)
 
 ##------ if write to file ------
-prepareHetero(aneuploidy_vcf, target, writeToFile=TRUE, destination=".")
+prepareHetero(aneuploidy_vcf, target,writeToFile=TRUE, destination=".")
 }
 \author{
 Yu Kong

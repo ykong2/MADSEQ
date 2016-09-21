@@ -64,7 +64,7 @@
 #' ## specify the path to the bed file containing targeted region
 #' target = system.file("extdata","target.bed",package="MADSEQ")
 #' ## prepare heterozygous sites
-#' aneuploidy_hetero = prepareHetero(aneuploidy_vcf, target, writeToFile=FALSE)
+#' aneuploidy_hetero = prepareHetero(aneuploidy_vcf,target, writeToFile=FALSE)
 #' 
 #' ##------Prepare Normalized Coverage
 #' ## specify the path to the bam file
@@ -129,51 +129,55 @@ runMadSeq = function(
     if(class(coverage)=="GRanges"){
         target_cov=as.data.frame(coverage[seqnames(coverage)==target_chr])
         data_coverage = target_cov$normed_depth
+        data_width=sum(width(IRanges(start=target_cov$start,end=target_cov$end)))
         control_coverage = mean(target_cov$ref_depth,na.rm=TRUE)
         auto_cov = coverage[seqnames(coverage)!="chrX"&
                                 seqnames(coverage)!="chrY"&
                                 seqnames(coverage)!="X"&
                                 seqnames(coverage)!="Y"]
-        auto_cov_mean = mean(mcols(auto_cov)$normed_depth,na.rm=TRUE)
+        auto_cov_mean = mean(mcols(auto_cov)$ref_depth,na.rm=TRUE)
     }
     else if(class(coverage)=="character"){
         cov = read.table(coverage,header=TRUE,sep="\t")
         target_cov = cov[cov$seqnames==target_chr,]
         data_coverage = target_cov$normed_depth
+        data_width=sum(width(IRanges(start=target_cov$start,end=target_cov$end)))
         control_coverage = mean(target_cov$ref_depth,na.rm=TRUE)
         sample = strsplit(coverage,"_")[[1]][1]
         auto_cov = cov[cov$seqnames!="chrX" & cov$seqnames!="chrY" & 
                         cov$seqnames !="X" & cov$seqnames !="Y",]
-        auto_cov_mean = mean(auto_cov$normed_depth,na.rm=TRUE)
+        auto_cov_mean = mean(auto_cov$ref_depth,na.rm=TRUE)
     }
     
     ## if target chr is sex chromosomes, check the copy of sex chromosome
     if(target_chr=="chrX"|target_chr=="X"){
         chrX_cov_mean = mean(data_coverage)
-        ## if there is no heterozygous sites on chrX, 
+        ## if there is lack heterozygous sites on chrX (according to poplation
+        ## genetics, heterozygosity ~ 0.001, considering filter and genotyping
+        ## capacity, if heterozygosity < 0.0001), 
         ## and the coverage for chrX is much smaller than autosome
         ## only one X chromosome
-        if(nrow(target_AAF)<20 & (chrX_cov_mean/auto_cov_mean)<0.75){
+        if(nrow(target_AAF)<(data_width*0.0001) & 
+           (chrX_cov_mean/auto_cov_mean)<0.75){
             message("there is only one X chromosome")
             return()
         } 
     }
     else if (target_chr=="chrY"|target_chr=="Y"){
-        auto_cov = coverage[seqnames(coverage)!="chrX"&
-                                seqnames(coverage)!="chrY"&
-                                seqnames(coverage)!="X"&
-                                seqnames(coverage)!="Y"]
-        auto_cov_mean = mean(mcols(auto_cov)$normed_depth,na.rm=TRUE)
         chrY_cov_mean = mean(data_coverage)
         chrY_cov_len = length(data_coverage)
         ## if there is no heterozygous sites on chrY
-        ## and no reads on chrY
+        ## and no reads on chrY or coverage for chrY is extremely low
         ## no Y chromosome
-        if(nrow(target_AAF)<20&chrY_cov_len<50){
+        if((nrow(target_AAF)<50&chrY_cov_len<50)|
+           (nrow(target_AAF)<50&chrY_cov_mean<(0.2*auto_cov_mean))){
             message("there is NO Y chromosome")
             return()
         }
-        else if (nrow(target_AAF)<20&(chrY_cov_mean/auto_cov_mean)<0.75){
+        else if ((nrow(target_AAF)<(data_width*0.001)&
+                (chrY_cov_mean/auto_cov_mean)<0.75)|
+                ((nrow(target_AAF)<10)&
+                 (chrY_cov_mean/auto_cov_mean)<0.9)){
             message("there is one Y chromosome")
             return()
         }
@@ -197,11 +201,11 @@ runMadSeq = function(
     load.module("mix")
     
     ## check arch of the platform
-    if(length(grep("i386",R.Version()$arch))>0){
-        message("please check the JAGS model, 
-                make sure you are using JAGS-4.2.0-Rtools33.exe")
-        return(NULL)
-    }
+#     if(length(grep("i386",R.Version()$arch))>0){
+#         message("please check the JAGS model, 
+#                 make sure you are using JAGS-4.2.0-Rtools33.exe")
+#         return(NULL)
+#     }
     ## run normal model
     normal = runNormal(
         target_AAF,
@@ -269,6 +273,8 @@ runMadSeq = function(
     message("models done, comparing models")
     BIC = c(normal[[2]], monosomy[[2]], mitotic_trisomy[[2]], 
             meiotic_trisomy[[2]], LOH[[2]])
+    # add 10 penalty other comlicated models to get confident results
+    BIC = c(BIC[1],BIC[2:5]+10)
     BIC = sort(BIC,decreasing = FALSE)
     best_model = names(which.min(BIC))
     selected = substr(best_model,5,nchar(best_model))

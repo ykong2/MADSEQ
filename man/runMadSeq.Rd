@@ -86,7 +86,7 @@ aneuploidy_vcf = system.file("extdata","aneuploidy.vcf.gz",package="MADSEQ")
 ## specify the path to the bed file containing targeted region
 target = system.file("extdata","target.bed",package="MADSEQ")
 ## prepare heterozygous sites
-aneuploidy_hetero = prepareHetero(aneuploidy_vcf, target, writeToFile=FALSE)
+aneuploidy_hetero = prepareHetero(aneuploidy_vcf,target, writeToFile=FALSE)
 
 ##------Prepare Normalized Coverage
 ## specify the path to the bam file

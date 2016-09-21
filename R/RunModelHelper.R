@@ -69,10 +69,7 @@ creatDataList_LOH = function(
     nSNP = dim(data)[1]
     z = data$Alt_D
     N = data$Alt_D+data$Ref_D
-    Nclust = 4
     mixture = rep(NA,nSNP)
-    mixture[match(max(z/N),z/N)]=1
-    mixture[match(min(z/N),z/N)]=2
     m = mean(z/N)
     control_coverage = control_coverage[control_coverage!=0]
     data_coverage = data_coverage[data_coverage!=0]
@@ -89,8 +86,7 @@ creatDataList_LOH = function(
                     z = z,
                     N = N,
                     m = m,
-                    mixture = mixture,
-                    Nclust = Nclust)
+                    mixture = mixture)
     return(dataList)
 }
 
@@ -341,7 +337,7 @@ runLOH = function(
     nStep,
     thinSteps){
     ## parameters for LOH model
-    parameters_LOH = c("p_cov","m_cov","r_cov","mu","kappa","p","f")
+    parameters_LOH = c("p_cov","m_cov","r_cov","kappa","f","cgp1","cgp2","d1","d2","m")
     ## generate dataList for the MCMC
     dataList = creatDataList_LOH(data,control_coverage,data_coverage)
     ## run LOH model
@@ -506,33 +502,41 @@ log_likelihood_UPD = function(
     parameter = apply(posterior,2,median)
     z = dataList$z
     N = dataList$N
-    a1 = parameter["mu[1]"]*parameter["kappa"]
-    b1 = (1-parameter["mu[1]"])*parameter["kappa"]
-    a2 = parameter["mu[2]"]*parameter["kappa"]
-    b2 = (1-parameter["mu[2]"])*parameter["kappa"]
-    a3 = parameter["mu[3]"]*parameter["kappa"]
-    b3 = (1-parameter["mu[3]"])*parameter["kappa"]
-    p1 = parameter["p[1]"]
-    p2 = parameter["p[2]"]
-    p3 = parameter["p[3]"]
-    p4 = 0.01
+    a1 = (parameter["m"]+parameter["d1"])*parameter["kappa"]
+    b1 = (1-parameter["m"]-parameter["d1"])*parameter["kappa"]
+    a2 = (parameter["m"]-parameter["d2"])*parameter["kappa"]
+    b2 = (1-parameter["m"]+parameter["d2"])*parameter["kappa"]
+    a3 = parameter["m"]*parameter["kappa"]
+    b3 = (1-parameter["m"])*parameter["kappa"]
+    cgp1 = round(parameter["cgp1"])
+    cgp2 = round(parameter["cgp2"])
+    
     # likelihood for aaf
     loglike_aaf = 0
     for (i in 1:length(z)){
-        sub_loglike =
-            log(p1*dbetabinom.ab(z[i],N[i],a1,b1)+
-                    p2*dbetabinom.ab(z[i],N[i],a2,b2)+
-                    p3*dbetabinom.ab(z[i],N[i],a3,b3)+
-                    p4*dbetabinom.ab(z[i],N[i],1,1))
+        if(i<cgp1){
+            sub_loglike = log(0.99*dbetabinom.ab(z[i],N[i],a3,b3)+
+                                0.01*dbetabinom.ab(z[i],N[i],1,1))
+        }
+        else if (i>=cgp1 & i<=cgp2){
+            sub_loglike =log(0.495*dbetabinom.ab(z[i],N[i],a1,b1)+
+                            0.495*dbetabinom.ab(z[i],N[i],a2,b2)+
+                            0.01*dbetabinom.ab(z[i],N[i],1,1))
+        }
+        else if (i >cgp2){
+            sub_loglike = log(0.99*dbetabinom.ab(z[i],N[i],a3,b3)+
+                                0.01*dbetabinom.ab(z[i],N[i],1,1))
+        }
         loglike_aaf = loglike_aaf + sub_loglike
     }
+    
     # likelihood for coverage
     N_cov = dataList$N_cov
     r_cov = parameter["r_cov"]
     p_cov = parameter["p_cov"]
     log_cov = 0
     for (i in 1:length(N_cov)){
-        sub_log_cov = stats::dnbinom(N_cov[i],size=r_cov,prob=p_cov,log=TRUE)
+        sub_log_cov = dnbinom(N_cov[i],size=r_cov,prob=p_cov,log=TRUE)
         log_cov = log_cov + sub_log_cov
     }
     log_sum = loglike_aaf +log_cov
@@ -559,7 +563,7 @@ calculate_BIC = function(
     }
     else if (type=="UPD"){
         loglike = log_likelihood_UPD(posterior,dataList)
-        BIC = -2*loglike + 3*log(datapoint)
+        BIC = -2*loglike + 4*log(datapoint)
     }
     return(BIC)
 }

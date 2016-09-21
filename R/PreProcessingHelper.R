@@ -9,10 +9,12 @@ calculateSubCoverage = function(
     bam){
     ## read bam file from given ranges,
     ## filter out duplicated reads, secondary reads and unmapped reads
+    ## exclude reads with mapQ==0
     param = ScanBamParam(flag=scanBamFlag(isUnmappedQuery=FALSE, 
                                             isSecondaryAlignment=FALSE, 
                                             isDuplicate=FALSE),
-                        which=range)
+                        which=range,
+                        mapqFilter=1)
     ## read alignment
     sub_alignment = readGAlignments(bam,param=param)
     ## calculate coverage
@@ -30,14 +32,24 @@ getCoverage = function(
     target_bed, 
     genome_assembly="hg19"){
     ## read in target bed table
-    target = utils::read.table(target_bed,sep="\t",header=FALSE)
-    ## prepare GRanges object for input bed file
-    target_gr = GenomicRanges::GRanges(seqnames=Rle(target[,1]), 
-                                        ranges=IRanges(start=target[,2]+1,
-                                                        end=target[,3]),
-                                        strand=rep("*",nrow(target)))
-    #seqinfo = Seqinfo(genome=genome_assembly)[seqlevels(target_gr)]
-    #seqinfo(target_gr) = seqinfo
+    target_gr = rtracklayer::import(target_bed)
+    if(nchar(seqlevels(target_gr)[1])>3){
+        seqlevels(target_gr,force=TRUE)=c("chr1","chr2","chr3","chr4","chr5",
+                                          "chr6","chr7","chr8","chr9","chr10",
+                                          "chr11","chr12","chr13","chr14",
+                                          "chr15","chr16","chr17","chr18",
+                                          "chr19","chr20","chr21","chr22",
+                                          "chrX","chrY")
+    }
+    else{
+        seqlevels(target_gr,force=TRUE)=c("1","2","3","4","5",
+                                          "6","7","8","9","10",
+                                          "11","12","13","14",
+                                          "15","16","17","18",
+                                          "19","20","21","22",
+                                          "X","Y")
+    }
+    target_gr = sort(target_gr)
     nRegion = length(target_gr)
     cat(paste(nRegion, "regions from", length(seqlevels(target_gr)),
                 "chromosomes in the bed file.", sep=" "))
@@ -233,6 +245,7 @@ correctGCBias = function(
                     GC = gc_depth$GC,
                     normed_depth = gc_depth$normed_coverage)
     }
+    res = res[!is.na(mcols(res)$normed_depth)]
     res
 }
 
@@ -243,24 +256,18 @@ correctGCBias = function(
 calculateNormedCoverage = function(
     object,
     plot=TRUE){
-    ## check if the coordinate is with "chr" or not
-    if(nchar(as.character(seqnames(object[[1]])@values[1]))>3){
-        chr_order = c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8",
-                    "chr9","chr10","chr11","chr12","chr13","chr14","chr15",
-                    "chr16","chr17","chr18","chr19","chr20","chr21","chr22",
+    if(nchar(seqlevels(object)[1])>3){
+        chr_name=c("chr1","chr2","chr3","chr4","chr5",
+                    "chr6","chr7","chr8","chr9","chr10",
+                    "chr11","chr12","chr13","chr14",
+                    "chr15","chr16","chr17","chr18",
+                    "chr19","chr20","chr21","chr22",
                     "chrX","chrY")
-        chr_name = seqlevels(object)
-        chr_name = chr_name[match(chr_order,chr_name)]
-        chr_name = chr_name[!is.na(chr_name)]
     }
     else{
-        chr_order = c("1","2","3","4","5","6","7","8","9","10","11","12",
-                    "13","14","15","16","17","18","19","20","21","22","X","Y")
-        chr_name = seqlevels(object)
-        chr_name = chr_name[match(chr_order,chr_name)]
-        chr_name = chr_name[!is.na(chr_name)]
+        chr_name = c("1","2","3","4","5","6","7","8","9","10","11","12",
+                     "13","14","15","16","17","18","19","20","21","22","X","Y")
     }
-    
     nSample = length(object)
     sample_name = names(object)
     split_object = sapply(object,function(x)split(x,seqnames(x)))
@@ -273,6 +280,7 @@ calculateNormedCoverage = function(
         after_chr = rbind(after_chr,sub_after_chr[chr_name])
     }
     rownames(after_chr) = sample_name
+    after_chr = replace(after_chr,is.nan(after_chr),0)
     
     ## if plot requested, then plot 
     if (plot == TRUE){
@@ -291,24 +299,29 @@ calculateNormedCoverage = function(
                 quantiled_chr=rbind(quantiled_chr,sub_quantiled_chr[chr_name])
             }
         }
+        before_chr = replace(before_chr,is.nan(before_chr),0)
+        quantiled_chr = replace(quantiled_chr,is.nan(quantiled_chr),0)
         ## plot
         cols = sample(grDevices::colors(),nSample)
         nChr = ncol(after_chr)
         ## 1. plot raw coverage
         plot(1:nChr,rep(1,nChr),type="n",
-            ylim=c(0.5*min(before_chr),1.5*max(before_chr)),
+            ylim=c(0.5*min(before_chr,na.rm=TRUE),
+                    1.5*max(before_chr,na.rm=TRUE)),
             xlab="chromosome",ylab="average coverage",
             main = "raw data",xaxt="n")
         graphics::axis(1,at=seq(1,nChr),chr_name[1:nChr],las=2)
         for (i in 1:nSample){
             graphics::lines(1:nChr,before_chr[i,],type="b",pch=16,col=cols[i])
         }
-        graphics::legend("topright",sample_name,pch=16,col=cols)
+        graphics::legend("topright",sample_name,pch=16,col=cols,
+                        ncol=ceiling(nSample/5),cex=0.6)
         
         if(nSample>1){
             ## 2. plot quantiled coverage
             plot(1:nChr,rep(1,nChr),type="n",xaxt="n",
-                ylim=c(0.5*min(quantiled_chr),1.5*max(quantiled_chr)),
+                ylim=c(0.5*min(quantiled_chr,na.rm=TRUE),
+                        1.5*max(quantiled_chr,na.rm=TRUE)),
                 xlab="chromosome",ylab="average coverage",
                 main="quantile normalized")
             graphics::axis(1,at=seq(1,nChr),chr_name[1:nChr],las=2)
@@ -316,18 +329,20 @@ calculateNormedCoverage = function(
                 graphics::lines(1:nChr,quantiled_chr[i,],type="b",
                                 pch=16,col=cols[i])
             }
-            graphics::legend("topright",sample_name,pch=16,col=cols)
+            graphics::legend("topright",sample_name,pch=16,col=cols,
+                            ncol=ceiling(nSample/5),cex=0.6)
         }
         
         ## 3. plot normed coverage
         plot(1:nChr,rep(1,nChr),type="n",xaxt="n",
-            ylim=c(0.5*min(after_chr),1.5*max(after_chr)),
+            ylim=c(0.5*min(after_chr,na.rm=TRUE),1.5*max(after_chr,na.rm=TRUE)),
             xlab="chromosome",ylab="average coverage",main="GC normalized")
         graphics::axis(1,at=seq(1,nChr),chr_name[1:nChr],las=2)
         for (i in 1:nSample){
             graphics::lines(1:nChr,after_chr[i,],type="b",pch=16,col=cols[i])
         }
-        graphics::legend("topright",sample_name,pch=16,col=cols)
+        graphics::legend("topright",sample_name,pch=16,col=cols,
+                         ncol=ceiling(nSample/5),cex=0.6)
     }
     after_chr
 }
@@ -339,3 +354,4 @@ isHetero = function(x){
     genotype = geno(x)$GT
     genotype == "0/1" | genotype == "1/0"
 }
+

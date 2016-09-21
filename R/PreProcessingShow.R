@@ -241,7 +241,7 @@ normalizeCoverage = function(
             ## if there are more than 1 sample and there is no control
             ## take median of normed average coverage for each chromosome as 
             ## reference
-            ref_cov = apply(after_chr,2,median)
+            ref_cov = apply(after_chr,2,function(x)median(x,na.rm = TRUE))
         }
         ## if control is provided, 
         ## take average coverage for control as reference
@@ -249,7 +249,9 @@ normalizeCoverage = function(
         res = NULL
         for (i in 1:nSample){
             sub_res = corrected[[i]]
-            mcols(sub_res)$ref_depth = rep(ref_cov,seqnames(sub_res)@lengths)
+            chr_length = sapply(colnames(after_chr),
+                                function(x)length(sub_res[seqnames(sub_res)==x]))
+            mcols(sub_res)$ref_depth = rep(ref_cov,chr_length)
             if(is.null(res)) res = GRangesList(sub_res)
             else res = c(res,GRangesList(sub_res))
         }
@@ -296,7 +298,7 @@ normalizeCoverage = function(
 #' by \code{bgzip}. The tool is part of \code{tabix} package, 
 #' can be download from \url{http://www.htslib.org/}
 #' @param target_bed A \code{character}, specify the path to the location of
-#' the bed file containing targeted regions.
+#' bed file containing targeted regions.
 #' @param genome A \code{character}, specify the assembly of your genome. 
 #' Default: hg19. To see available genome assembly, 
 #' use \code{\link{available.genomes}} from \link{BSgenome} package
@@ -318,15 +320,12 @@ normalizeCoverage = function(
 #' @examples 
 #' ## specify the path to the vcf.gz file for the aneuploidy sample
 #' aneuploidy_vcf=system.file("extdata","aneuploidy.vcf.gz",package="MADSEQ")
-#' 
-#' ## specify the path to the bed file containing targeted region
 #' target = system.file("extdata","target.bed",package="MADSEQ")
-#' 
 #' ##------ if not write to file ------
-#' aneuploidy_hetero=prepareHetero(aneuploidy_vcf, target, writeToFile=FALSE)
+#' aneuploidy_hetero=prepareHetero(aneuploidy_vcf,target,writeToFile=FALSE)
 #' 
 #' ##------ if write to file ------
-#' prepareHetero(aneuploidy_vcf, target, writeToFile=TRUE, destination=".")
+#' prepareHetero(aneuploidy_vcf, target,writeToFile=TRUE, destination=".")
 #' @seealso \code{\link{runMadSeq}}
 #' @author Yu Kong
 #' @import VariantAnnotation
@@ -335,6 +334,8 @@ normalizeCoverage = function(
 #' @import IRanges
 #' @importFrom SummarizedExperiment rowRanges
 #' @importFrom utils write.table
+#' @importFrom rtracklayer import
+#' @importMethodsFrom  GenomeInfoDb seqlevels<-
 #' @export
 prepareHetero = function(
     vcffile,
@@ -345,17 +346,36 @@ prepareHetero = function(
     ## first to see if tabix file exist
     try(indexTabix(vcffile,"vcf"))
     
+    ## set the target region
+    ## read in target bed table
+    target_gr = rtracklayer::import(target_bed)
+    if(nchar(seqlevels(target_gr)[1])>3){
+        seqlevels(target_gr,force=TRUE)=c("chr1","chr2","chr3","chr4","chr5",
+                                        "chr6","chr7","chr8","chr9","chr10",
+                                        "chr11","chr12","chr13","chr14",
+                                        "chr15","chr16","chr17","chr18",
+                                        "chr19","chr20","chr21","chr22",
+                                        "chrX","chrY")
+    }
+    else{
+        seqlevels(target_gr,force=TRUE)=c("1","2","3","4","5",
+                                          "6","7","8","9","10",
+                                          "11","12","13","14",
+                                          "15","16","17","18",
+                                          "19","20","21","22",
+                                          "X","Y")
+    }
+    target_gr = sort(target_gr)
     ## get sample name
     sample_name = strsplit(vcffile,"/")[[1]]
     sample_name = sample_name[length(sample_name)]
     ## set the param for vcf: 
     ## 1. keep genotype, allelic depth and depth from VCF file
     ## 2. only keep sites that are located in targeted regions
-    vcf_param = ScanVcfParam(geno=c("GT","AD","DP"))
+    vcf_param = ScanVcfParam(geno=c("GT","AD","DP"),which=target_gr)
     
     ## filter vcf by:
     ## 1. only keep heterozygous site
-    ## 2. sites with at least 10 reads, at least 3 supporting minor allele
     des_vcf = tempfile()
     vcf = filterVcf(vcffile, genome=genome,
                     filters=FilterRules(list(isHetero=isHetero)),
@@ -366,7 +386,7 @@ prepareHetero = function(
     res = SummarizedExperiment::rowRanges(dat)
     gt = unname(geno(dat)$GT[,1])
     dp = unname(geno(dat)$DP[,1])
-    ad = ad = geno(dat)$AD
+    ad = geno(dat)$AD
     ref_d = sapply(ad,function(x)x[1])
     alt_d = sapply(ad,function(x)x[2])
     
@@ -374,6 +394,15 @@ prepareHetero = function(
     mcols(res)$DP = dp
     mcols(res)$Ref_D = ref_d
     mcols(res)$Alt_D = alt_d
+    mcols(res)$REF = as.character(mcols(res)$REF)
+    tmp_alt = lapply(mcols(res)$ALT,as.character)
+    tmp_alt = lapply(tmp_alt,function(x)x[x!="<NON_REF>"])
+    tmp_alt = sapply(tmp_alt,paste,collapse = ",")
+    mcols(res)$ALT = tmp_alt
+    res = res[!is.na(mcols(res)$Alt_D)&
+                !is.na(mcols(res)$Ref_D)&
+                !is.na(mcols(res)$REF)&
+                !is.na(mcols(res)$ALT)]
     names(res) = seq(1:length(res))
     
     ## filter by the depth:
@@ -381,6 +410,9 @@ prepareHetero = function(
     ## 2. reads supporting minor allele >= 3
     res = res[mcols(res)$DP>=10&mcols(res)$Ref_D>=3&mcols(res)$Alt_D>=3]
     
+    ## 3. keep only SNP
+    res = res[nchar(mcols(res)$REF)==1&nchar(mcols(res)$ALT)==1]
+    res = res[nchar(unlist(mcols(res)$ALT))==1]
     ## if write to file requested, then write filtered heterozygous sites into
     ## file, otherwise return it as a GRanges object
     if(writeToFile == TRUE){

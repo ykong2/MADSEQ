@@ -45,8 +45,9 @@ aneuploidy cells.
     * The FORMAT section of the vcf file should contain depth (DP) and allelic 
     depth (AD) field.
 * A __bed__ file containing targeted regions: if it's targeted sequencing data,
-  then the bed file contatining targeted regions; if it's whole genome 
-  sequencing, bin the whole genome into equal size bins (i.e. 500kb).
+  then the bed file contatining targeted regions (tiled regions is recommended)
+  . If it's whole genome sequencing, bin the whole genome into equal size 
+  bins (i.e. 500kb).
 
 **Note:** Currently our package only supports one bam and one vcf file per 
 sample. If you have more than one sample, please prepare multiple bam and vcf 
@@ -210,11 +211,11 @@ aneuploidy_vcf = system.file("extdata","aneuploidy.vcf.gz",package="MADSEQ")
 ## target bed file specified before
 
 ## If you choose to write the output to file (recommended)
-prepareHetero(aneuploidy_vcf, target_bed=target, genome="hg19", 
+prepareHetero(aneuploidy_vcf, target, genome="hg19", 
               writeToFile=TRUE, destination=".")
 
 ## If you don't want to write output to file
-aneuploidy_hetero = prepareHetero(aneuploidy_vcf, target_bed=target, 
+aneuploidy_hetero = prepareHetero(aneuploidy_vcf, target,
                                   genome="hg19", writeToFile=FALSE)
 
 ```
@@ -311,35 +312,21 @@ parameters = c("f","m","mu[1]","mu[2]","mu[3] (LOH model)",
                "mu[3] (meiotic trisomy model)","mu[4]","kappa","p[1]","p[2]",
                "p[3]","p[4]","p[5]","m_cov","p_cov","r_cov")
 explains = c("Fraction of mosaic aneuploidy",
-             "The midpoint of the alternative allele frequency (AAF) 
-             for all heterozygous sites",
-             "Mean AAF of mixture 1: the AAFs of this mixture shifted 
-             from midpoint to some higher values", 
-             "Mean AAF of mixture 2: the AAFs of this mixture shifted 
-             from midpoint to some lower values",
-             "Mean AAF of mixture 3: In LOH model, mu[3] indicates normal 
-             sites without loss of heterozygosity",
-             "Mean AAF of mixture 3: In meiotic model, the AAFs of this 
-             mixture shifted from 0 to some higher value",
-             "Mean AAF of mixture 4: the AAFs of this mixture shifted 
-             from 1 to some lower value (only in meiotic model)",
-             "Indicate variance of the AAF mixtures: 
-             larger kappa means smaller variance",
-             "Weight of mixture 1: indicate the proportion of 
-             heterozygous sites in the mixture 1",
-             "Weight of mixture 2: indicate the proportion of 
-             heterozygous sites in the mixture 2",
-             "Weight of mixture 3: indicate the proportion of heterozygous 
-             sites in the mixture 3 (only in LOH and meiotic model)",
-             "Weight of mixture 4: indicate the proportion of heterozygous 
-             sites in the mixture 4 (only in meiotic model)",
-             "Weight of outlier component: the AAF of 1% sites might 
-             not well behaved, so these sites are treated as noise.",
-             "Mean coverage of all the sites from the chromosome, 
-             estimated from a negative binomial distribution",
+             "The midpoint of the alternative allele frequency (AAF) for all heterozygous sites",
+             "Mean AAF of mixture 1: the AAFs of this mixture shifted from midpoint to some higher values", 
+             "Mean AAF of mixture 2: the AAFs of this mixture shifted from midpoint to some lower values",
+             "Mean AAF of mixture 3: In LOH model, mu[3] indicates normal sites without loss of heterozygosity",
+             "Mean AAF of mixture 3: In meiotic model, the AAFs of this mixture shifted from 0 to some higher value",
+             "Mean AAF of mixture 4: the AAFs of this mixture shifted from 1 to some lower value (only in meiotic model)",
+             "Indicate variance of the AAF mixtures: larger kappa means smaller variance",
+             "Weight of mixture 1: indicate the proportion of heterozygous sites in the mixture 1",
+             "Weight of mixture 2: indicate the proportion of heterozygous sites in the mixture 2",
+             "Weight of mixture 3: indicate the proportion of heterozygous sites in the mixture 3 (only in LOH and meiotic model)",
+             "Weight of mixture 4: indicate the proportion of heterozygous sites in the mixture 4 (only in meiotic model)",
+             "Weight of outlier component: the AAF of 1% sites might not well behaved, so these sites are treated as noise.",
+             "Mean coverage of all the sites from the chromosome, estimated from a negative binomial distribution",
              "Prob of the negative binomial distribution for the coverage",
-             "Another parameter (r) for the negative binomial disbribution 
-             of the coverage, small r means large variance")
+             "Another parameter (r) for the negative binomial disbribution of the coverage, small r means large variance")
 table = data.frame(parameters,explains)
 kable(table,col.names =c("parameters","description") ,align="c")
 ```
