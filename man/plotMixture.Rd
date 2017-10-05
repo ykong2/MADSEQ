@@ -29,13 +29,12 @@ data("aneuploidy_chr18")
 ## plot the distribution of estimated AAF
 plotMixture(aneuploidy_chr18)
 }
+\seealso{
+\code{\link{runMadSeq}}, \code{\link{plotMadSeq}}, 
+\code{\link{plotFraction}}
+}
 \author{
 Yu Kong
 
 Yu Kong
 }
-\seealso{
-\code{\link{runMadSeq}}, \code{\link{plotMadSeq}}, 
-\code{\link{plotFraction}}
-}
-

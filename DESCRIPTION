@@ -2,9 +2,9 @@ Package: MADSEQ
 Type: Package
 Title: Mosaic Aneuploidy Detection and Quantification using Massive
         Parallel Sequencing Data
-Version: 0.99.10
-Date: 2016-04-05
-Author:Yu Kong, Adam Auton, John Murray Greally
+Version: 1.2.1
+Date: 2017-10-05
+Author: Yu Kong, Adam Auton, John Murray Greally
 Maintainer: Yu Kong <yu.kong@phd.einstein.yu.edu>
 Description: The MADSEQ package provides a group of hierarchical
         Bayeisan models for the detection of mosaic aneuploidy, the
@@ -26,5 +26,5 @@ biocViews: GenomicVariation, SomaticMutation, VariantDetection,
         Bayesian, CopyNumberVariation, Sequencing, Coverage
 URL: https://github.com/ykong2/MADSEQ
 BugReports: https://github.com/ykong2/MADSEQ/issues
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 NeedsCompilation: no

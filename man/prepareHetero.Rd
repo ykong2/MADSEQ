@@ -5,7 +5,7 @@
 \title{prepare heterozygous sites for aneuploidy detection}
 \usage{
 prepareHetero(vcffile, target_bed, genome = "hg19", writeToFile = TRUE,
-  destination = NULL)
+  destination = NULL, plot = FALSE)
 }
 \arguments{
 \item{vcffile}{A \code{character}, specify the path to the location of the 
@@ -30,6 +30,10 @@ will be returned}
 \item{destination}{A \code{character}, specify the path to the location 
 where the processed heterozygous sites table will be written. 
 Default: \code{NULL}, the file will be written to current working directory}
+
+\item{plot}{A \code{Boolean} Default: \code{FALSE}. If \code{TRUE},
+A plot showing AAF before and after filtering for problematic regions will 
+be generated}
 }
 \value{
 If \code{writeToFile} is set to TRUE, processed table will be 
@@ -55,10 +59,9 @@ aneuploidy_hetero=prepareHetero(aneuploidy_vcf,target,writeToFile=FALSE)
 ##------ if write to file ------
 prepareHetero(aneuploidy_vcf, target,writeToFile=TRUE, destination=".")
 }
-\author{
-Yu Kong
-}
 \seealso{
 \code{\link{runMadSeq}}
 }
-
+\author{
+Yu Kong
+}

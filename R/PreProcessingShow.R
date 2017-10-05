@@ -311,6 +311,9 @@ normalizeCoverage = function(
 #' @param destination A \code{character}, specify the path to the location 
 #' where the processed heterozygous sites table will be written. 
 #' Default: \code{NULL}, the file will be written to current working directory
+#' @param plot A \code{Boolean} Default: \code{FALSE}. If \code{TRUE},
+#' A plot showing AAF before and after filtering for problematic regions will 
+#' be generated
 #' @return If \code{writeToFile} is set to TRUE, processed table will be 
 #' written to the \code{destination}. Otherwise, a \code{\link{GRanges}}
 #' object containing each of input sample will be returned.
@@ -332,6 +335,8 @@ normalizeCoverage = function(
 #' @import BSgenome
 #' @import GenomicRanges
 #' @import IRanges
+#' @importFrom GenomeInfoDb keepStandardChromosomes
+#' @importFrom graphics points
 #' @importFrom SummarizedExperiment rowRanges
 #' @importFrom utils write.table
 #' @importFrom rtracklayer import
@@ -342,7 +347,8 @@ prepareHetero = function(
     target_bed,
     genome="hg19",
     writeToFile=TRUE,
-    destination=NULL){
+    destination=NULL,
+    plot=FALSE){
     ## first to see if tabix file exist
     try(indexTabix(vcffile,"vcf"))
     
@@ -405,9 +411,11 @@ prepareHetero = function(
                 !is.na(mcols(res)$ALT)]
     names(res) = seq(1:length(res))
     
-    ## filter by the depth:
-    ## 1. total number of reads >= 10
-    ## 2. reads supporting minor allele >= 3
+    ## filter:
+    ## 1. filter out non standard chromosome
+    res = keepStandardChromosomes(res)
+    
+    ## 2.total number of reads >= 10 + reads supporting minor allele >= 3
     res = res[mcols(res)$DP>=10&mcols(res)$Ref_D>=3&mcols(res)$Alt_D>=3]
     
     ## 3. keep only SNP
@@ -415,6 +423,13 @@ prepareHetero = function(
     res = res[nchar(unlist(mcols(res)$ALT))==1]
     ## if write to file requested, then write filtered heterozygous sites into
     ## file, otherwise return it as a GRanges object
+    
+    ## 4. remove SNPs around gap
+    res = removeGap(res,genome)
+    
+    ## 5. further treat regions most of the SNP are biased due to sequencing issues
+    res = filter_hetero(res,binsize=10,plot=plot)
+    
     if(writeToFile == TRUE){
         ## check if path to write file is provided,
         ## if not write to current working directory

@@ -355,3 +355,119 @@ isHetero = function(x){
     genotype == "0/1" | genotype == "1/0"
 }
 
+## remove SNPs overlapping with gap
+removeGap = function(gr,genome){
+    # 1. load the correct gap info for input genome
+    if(length(grep("19",genome))>0){
+        path = system.file("gap","hg19_gap_gr.RDS",package="MADSEQ")
+        gap_gr = readRDS(path)
+    }
+    else if(length(grep("37",genome))>0){
+        path = system.file("gap","hs37d5_gap_gr.RDS",package="MADSEQ")
+        gap_gr = readRDS(path)
+    }
+    else if(length(grep("38",genome))>0){
+        path = system.file("gap","hg38_gap_gr.RDS",package="MADSEQ")
+        gap_gr = readRDS(path)
+    }
+    
+    ov = findOverlaps(gr,gap_gr)
+    res_degap = gr[-queryHits(ov)]
+    res_degap
+}
+
+## remove regions with densed biased SNPs (usually regions around gaps/SVs)
+filter_hetero = function(data,binsize=10,plot=TRUE){
+    seqnames = unique(seqnames(data))
+    
+    for (seq_num in 1:length(seqnames)){
+        tmp_seq = seqnames[seq_num]
+        chr = data[seqnames(data)==tmp_seq]
+        
+        # calculate AAF in bin
+        AAF = mcols(chr)$Alt_D/mcols(chr)$DP
+        bin_start = seq(1,length(AAF)+binsize,binsize)
+        bin_end = (bin_start-1)[-1]
+        bin_end[length(bin_end)] = length(AAF) 
+        bin = data.frame(start=bin_start[1:length(bin_start)-1],end=bin_end)
+        
+        if(nrow(bin)>0){
+            AAF_bin = apply(bin,1,function(x)mean(AAF[x[1]:x[2]]))
+            bin$AAF = AAF_bin
+            
+            binned_AAF = rep(NA,length(chr))
+            for (i in 1:nrow(bin)){
+                tmp = bin[i,,drop=FALSE]
+                binned_AAF[c(tmp[1,1]:tmp[1,2])] = tmp[1,3]
+            }
+            mcols(chr)$AAF = AAF
+            mcols(chr)$binned_AAF1 = binned_AAF
+        }
+        else mcols(chr)$binned_AAF1 = 0
+        
+        
+        # sliding window
+        sliding_size = round(binsize/2)
+        bin2 = data.frame(start=bin$start+sliding_size,end=bin$end+sliding_size)
+        bin2 = bin2[bin2$end<length(AAF),]
+        
+        if(nrow(bin2)>0){
+            AAF_bin2 = apply(bin2,1,function(x)mean(AAF[x[1]:x[2]]))
+            bin2$AAF = AAF_bin2
+            
+            binned_AAF2 = rep(NA,length(chr))
+            for (i in 1:nrow(bin2)){
+                tmp = bin2[i,,drop=FALSE]
+                binned_AAF2[c(tmp[1,1]:tmp[1,2])] = tmp[1,3]
+            }
+            binned_AAF2 = ifelse(is.na(binned_AAF2),binned_AAF,binned_AAF2)
+            mcols(chr)$binned_AAF2 = binned_AAF2
+        }
+        else mcols(chr)$binned_AAF2 = 0
+        
+        if(quantile(c(AAF_bin,AAF_bin2),0.05)<0.4|quantile(c(AAF_bin,AAF_bin2),0.95)>0.58){
+            limit_low = quantile(c(AAF_bin,AAF_bin2),0.01)
+            limit_high = quantile(c(AAF_bin,AAF_bin2),0.99)
+        }
+        else{
+            limit_low = min(max(0.35,quantile(c(AAF_bin,AAF_bin2),0.02)),0.4)
+            limit_high = max(min(0.65,quantile(c(AAF_bin,AAF_bin2),0.98)),0.6)
+        }
+        keep_idx = mcols(chr)$binned_AAF1>=limit_low&mcols(chr)$binned_AAF1<=limit_high&mcols(chr)$binned_AAF2>=limit_low&mcols(chr)$binned_AAF2<=limit_high
+        chr_f = chr[keep_idx]
+        
+        if (seq_num==1){
+            res = chr_f
+        }
+        else res = c(res,chr_f)
+        
+        if (plot==TRUE){
+            par(mfrow=c(3,1))
+            if(length(chr)>=1){
+                plot(start(chr),mcols(chr)$AAF,pch=16,cex=0.5,ylim=c(0,1),xlab=tmp_seq,ylab="AAF",main="before",xlim=c(0,max(start(chr))))
+                dup = duplicated(mcols(chr)$binned_AAF1)
+                reduced_chr = chr[!dup]
+                points(start(reduced_chr),mcols(reduced_chr)$binned_AAF1,pch=16,col="red",cex=0.6)
+                points(start(reduced_chr),mcols(reduced_chr)$binned_AAF2,pch=16,col="blue",cex=0.6)
+            }
+            
+            if(length(chr_f)>=1){
+                plot(start(chr_f),mcols(chr_f)$AAF,pch=16,cex=0.5,ylim=c(0,1),xlab=tmp_seq,ylab="AAF",main="after",xlim=c(0,max(start(chr))))
+            }
+            
+            chr_remove = chr[!keep_idx]
+            if(length(chr_remove)>=1){
+                plot(start(chr_remove),mcols(chr_remove)$AAF,pch=16,cex=0.5,ylim=c(0,1),xlab=tmp_seq,ylab="AAF",main="removed",xlim=c(0,max(start(chr))))
+                dup = duplicated(mcols(chr_remove)$binned_AAF1)
+                reduced_chr_remove = chr_remove[!dup]
+                points(start(reduced_chr_remove),mcols(reduced_chr_remove)$binned_AAF1,pch=16,col="red",cex=0.6)
+                points(start(reduced_chr_remove),mcols(reduced_chr_remove)$binned_AAF2,pch=16,col="blue",cex=0.6)
+            }
+        }
+    }
+    
+    res
+}
+
+
+

@@ -28,12 +28,11 @@ data("aneuploidy_chr18")
 ## access posterior distribution
 posterior(aneuploidy_chr18)
 }
+\seealso{
+\code{\link{MadSeq}}, \code{\link{runMadSeq}}
+}
 \author{
 Yu Kong
 
 Yu Kong
 }
-\seealso{
-\code{\link{MadSeq}}, \code{\link{runMadSeq}}
-}
-

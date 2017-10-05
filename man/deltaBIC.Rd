@@ -28,10 +28,9 @@ data("aneuploidy_chr18")
 ## access deltaBIC 
 deltaBIC(aneuploidy_chr18)
 }
-\author{
-Yu Kong
-}
 \seealso{
 \code{\link{MadSeq}}, \code{\link{runMadSeq}}
 }
-
+\author{
+Yu Kong
+}
