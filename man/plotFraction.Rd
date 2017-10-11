@@ -35,12 +35,23 @@ data("aneuploidy_chr18")
 ## plot estimated fraction of aneuploid cells
 plotFraction(aneuploidy_chr18)
 }
+<<<<<<< HEAD
 \seealso{
 \code{\link{runMadSeq}}, \code{\link{plotMadSeq}}, 
 \code{\link{plotMixture}}
 }
+=======
+>>>>>>> upstream/master
 \author{
 Yu Kong
 
 Yu Kong
 }
+<<<<<<< HEAD
+=======
+\seealso{
+\code{\link{runMadSeq}}, \code{\link{plotMadSeq}}, 
+\code{\link{plotMixture}}
+}
+
+>>>>>>> upstream/master

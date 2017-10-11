@@ -311,9 +311,12 @@ normalizeCoverage = function(
 #' @param destination A \code{character}, specify the path to the location 
 #' where the processed heterozygous sites table will be written. 
 #' Default: \code{NULL}, the file will be written to current working directory
+<<<<<<< HEAD
 #' @param plot A \code{Boolean} Default: \code{FALSE}. If \code{TRUE},
 #' A plot showing AAF before and after filtering for problematic regions will 
 #' be generated
+=======
+>>>>>>> upstream/master
 #' @return If \code{writeToFile} is set to TRUE, processed table will be 
 #' written to the \code{destination}. Otherwise, a \code{\link{GRanges}}
 #' object containing each of input sample will be returned.
@@ -335,8 +338,11 @@ normalizeCoverage = function(
 #' @import BSgenome
 #' @import GenomicRanges
 #' @import IRanges
+<<<<<<< HEAD
 #' @importFrom GenomeInfoDb keepStandardChromosomes
 #' @importFrom graphics points
+=======
+>>>>>>> upstream/master
 #' @importFrom SummarizedExperiment rowRanges
 #' @importFrom utils write.table
 #' @importFrom rtracklayer import
@@ -347,8 +353,12 @@ prepareHetero = function(
     target_bed,
     genome="hg19",
     writeToFile=TRUE,
+<<<<<<< HEAD
     destination=NULL,
     plot=FALSE){
+=======
+    destination=NULL){
+>>>>>>> upstream/master
     ## first to see if tabix file exist
     try(indexTabix(vcffile,"vcf"))
     
@@ -356,7 +366,12 @@ prepareHetero = function(
     ## read in target bed table
     target_gr = rtracklayer::import(target_bed)
     if(nchar(seqlevels(target_gr)[1])>3){
+<<<<<<< HEAD
         seqlevels(target_gr,force=TRUE)=c("chr1","chr2","chr3","chr4","chr5",
+=======
+        seqlevels(target_gr,pruning.mode="coarse")=
+                                      c("chr1","chr2","chr3","chr4","chr5",
+>>>>>>> upstream/master
                                         "chr6","chr7","chr8","chr9","chr10",
                                         "chr11","chr12","chr13","chr14",
                                         "chr15","chr16","chr17","chr18",
@@ -364,7 +379,12 @@ prepareHetero = function(
                                         "chrX","chrY")
     }
     else{
+<<<<<<< HEAD
         seqlevels(target_gr,force=TRUE)=c("1","2","3","4","5",
+=======
+        seqlevels(target_gr,pruning.mode="coarse")=
+                                        c("1","2","3","4","5",
+>>>>>>> upstream/master
                                           "6","7","8","9","10",
                                           "11","12","13","14",
                                           "15","16","17","18",
@@ -411,11 +431,17 @@ prepareHetero = function(
                 !is.na(mcols(res)$ALT)]
     names(res) = seq(1:length(res))
     
+<<<<<<< HEAD
     ## filter:
     ## 1. filter out non standard chromosome
     res = keepStandardChromosomes(res)
     
     ## 2.total number of reads >= 10 + reads supporting minor allele >= 3
+=======
+    ## filter by the depth:
+    ## 1. total number of reads >= 10
+    ## 2. reads supporting minor allele >= 3
+>>>>>>> upstream/master
     res = res[mcols(res)$DP>=10&mcols(res)$Ref_D>=3&mcols(res)$Alt_D>=3]
     
     ## 3. keep only SNP
@@ -423,6 +449,7 @@ prepareHetero = function(
     res = res[nchar(unlist(mcols(res)$ALT))==1]
     ## if write to file requested, then write filtered heterozygous sites into
     ## file, otherwise return it as a GRanges object
+<<<<<<< HEAD
     
     ## 4. remove SNPs around gap
     res = removeGap(res,genome)
@@ -430,6 +457,8 @@ prepareHetero = function(
     ## 5. further treat regions most of the SNP are biased due to sequencing issues
     res = filter_hetero(res,binsize=10,plot=plot)
     
+=======
+>>>>>>> upstream/master
     if(writeToFile == TRUE){
         ## check if path to write file is provided,
         ## if not write to current working directory

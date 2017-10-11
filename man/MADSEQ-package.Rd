@@ -23,6 +23,12 @@ the documentation. The manual explains what data do you need, and how to
 process the data to be ready for the model, what steps to follow and how to
 interpret the output from our model.
 }
+<<<<<<< HEAD
+=======
+\author{
+Yu Kong
+}
+>>>>>>> upstream/master
 \references{
 Martyn Plummer (2016). rjags: Bayesian Graphical Models using 
 MCMC. R package version 4-6.
@@ -31,6 +37,10 @@ C. Alkan, J. Kidd, T. Marques-Bonet et al (2009).
 Personalized copy number and segmental duplication maps using 
 next-generation sequencing. Nature Genetics, 41(10):1061-7.
 }
+<<<<<<< HEAD
 \author{
 Yu Kong
 }
+=======
+
+>>>>>>> upstream/master

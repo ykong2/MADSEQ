@@ -41,9 +41,19 @@ normal_bam = system.file("extdata","normal.bam",package="MADSEQ")
 aneuploidy_cov_gc = prepareCoverageGC(target,aneuploidy_bam,"hg19")
 normal_cov_gc = prepareCoverageGC(target,normal_bam,"hg19")
 }
+<<<<<<< HEAD
 \seealso{
 \code{\link{normalizeCoverage}}
 }
 \author{
 Yu Kong
 }
+=======
+\author{
+Yu Kong
+}
+\seealso{
+\code{\link{normalizeCoverage}}
+}
+
+>>>>>>> upstream/master

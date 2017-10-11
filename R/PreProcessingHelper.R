@@ -34,7 +34,12 @@ getCoverage = function(
     ## read in target bed table
     target_gr = rtracklayer::import(target_bed)
     if(nchar(seqlevels(target_gr)[1])>3){
+<<<<<<< HEAD
         seqlevels(target_gr,force=TRUE)=c("chr1","chr2","chr3","chr4","chr5",
+=======
+        seqlevels(target_gr,pruning.mode="coarse")=
+                                        c("chr1","chr2","chr3","chr4","chr5",
+>>>>>>> upstream/master
                                           "chr6","chr7","chr8","chr9","chr10",
                                           "chr11","chr12","chr13","chr14",
                                           "chr15","chr16","chr17","chr18",
@@ -42,7 +47,12 @@ getCoverage = function(
                                           "chrX","chrY")
     }
     else{
+<<<<<<< HEAD
         seqlevels(target_gr,force=TRUE)=c("1","2","3","4","5",
+=======
+        seqlevels(target_gr,pruning.mode="coarse")=
+                                        c("1","2","3","4","5",
+>>>>>>> upstream/master
                                           "6","7","8","9","10",
                                           "11","12","13","14",
                                           "15","16","17","18",
@@ -355,6 +365,7 @@ isHetero = function(x){
     genotype == "0/1" | genotype == "1/0"
 }
 
+<<<<<<< HEAD
 ## remove SNPs overlapping with gap
 removeGap = function(gr,genome){
     # 1. load the correct gap info for input genome
@@ -471,3 +482,5 @@ filter_hetero = function(data,binsize=10,plot=TRUE){
 
 
 
+=======
+>>>>>>> upstream/master
