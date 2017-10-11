@@ -34,7 +34,3 @@ summary(aneuploidy_chr18)
 \author{
 Yu Kong
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> upstream/master

@@ -29,23 +29,12 @@ data("aneuploidy_chr18")
 ## plot the posterior distribution
 plotMadSeq(aneuploidy_chr18)
 }
-<<<<<<< HEAD
 \seealso{
 \code{\link{runMadSeq}}, \code{\link{plotFraction}}, 
 \code{\link{plotMixture}}
 }
-=======
->>>>>>> upstream/master
 \author{
 Yu Kong
 
 Yu Kong
 }
-<<<<<<< HEAD
-=======
-\seealso{
-\code{\link{runMadSeq}}, \code{\link{plotFraction}}, 
-\code{\link{plotMixture}}
-}
-
->>>>>>> upstream/master

@@ -29,10 +29,7 @@ import(coda)
 import(methods)
 import(rjags)
 import(zlibbioc)
-<<<<<<< HEAD
 importFrom(GenomeInfoDb,keepStandardChromosomes)
-=======
->>>>>>> upstream/master
 importFrom(SummarizedExperiment,rowRanges)
 importFrom(VGAM,dbetabinom.ab)
 importFrom(grDevices,colors)
@@ -46,10 +43,7 @@ importFrom(graphics,lines)
 importFrom(graphics,mtext)
 importFrom(graphics,par)
 importFrom(graphics,plot)
-<<<<<<< HEAD
 importFrom(graphics,points)
-=======
->>>>>>> upstream/master
 importFrom(graphics,text)
 importFrom(preprocessCore,normalize.quantiles)
 importFrom(rtracklayer,import)
