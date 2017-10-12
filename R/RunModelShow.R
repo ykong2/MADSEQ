@@ -183,6 +183,12 @@ runMadSeq = function(
         }
     }
     
+    ## in some cases the coverage data is much longer than AAF data points
+    ## so we will downsize the coverage data to speed up, it can also help 
+    ## reduce FDR of low confident detection
+    if(length(data_coverage)>2*nrow(target_AAF)){
+        data_coverage = sample(data_coverage,2*nrow(target_AAF))
+    }
     ## print the number of SNP and coverage information
     message (paste("total number of heterozygous site:",nrow(target_AAF)))
     message (paste("total number of coverage",length(data_coverage)))
