@@ -34,22 +34,20 @@ getCoverage = function(
     ## read in target bed table
     target_gr = rtracklayer::import(target_bed)
     if(nchar(seqlevels(target_gr)[1])>3){
-        seqlevels(target_gr,pruning.mode="coarse")=
-                                        c("chr1","chr2","chr3","chr4","chr5",
-                                          "chr6","chr7","chr8","chr9","chr10",
-                                          "chr11","chr12","chr13","chr14",
-                                          "chr15","chr16","chr17","chr18",
-                                          "chr19","chr20","chr21","chr22",
-                                          "chrX","chrY")
+        seqlevels(target_gr,force=TRUE)=c("chr1","chr2","chr3","chr4","chr5",
+                                            "chr6","chr7","chr8","chr9","chr10",
+                                            "chr11","chr12","chr13","chr14",
+                                            "chr15","chr16","chr17","chr18",
+                                            "chr19","chr20","chr21","chr22",
+                                            "chrX","chrY")
     }
     else{
-        seqlevels(target_gr,pruning.mode="coarse")=
-                                        c("1","2","3","4","5",
-                                          "6","7","8","9","10",
-                                          "11","12","13","14",
-                                          "15","16","17","18",
-                                          "19","20","21","22",
-                                          "X","Y")
+        seqlevels(target_gr,force=TRUE)=c("1","2","3","4","5",
+                                            "6","7","8","9","10",
+                                            "11","12","13","14",
+                                            "15","16","17","18",
+                                            "19","20","21","22",
+                                            "X","Y")
     }
     target_gr = sort(target_gr)
     nRegion = length(target_gr)
@@ -447,24 +445,31 @@ filter_hetero = function(data,binsize=10,plot=TRUE){
         if (plot==TRUE){
             par(mfrow=c(3,1))
             if(length(chr)>=1){
-                plot(start(chr),mcols(chr)$AAF,pch=16,cex=0.5,ylim=c(0,1),xlab=tmp_seq,ylab="AAF",main="before",xlim=c(0,max(start(chr))))
+                plot(start(chr),mcols(chr)$AAF,pch=16,cex=0.5,ylim=c(0,1),
+                    xlab=tmp_seq,ylab="AAF",main="before",xlim=c(0,max(start(chr))))
                 dup = duplicated(mcols(chr)$binned_AAF1)
                 reduced_chr = chr[!dup]
-                points(start(reduced_chr),mcols(reduced_chr)$binned_AAF1,pch=16,col="red",cex=0.6)
-                points(start(reduced_chr),mcols(reduced_chr)$binned_AAF2,pch=16,col="blue",cex=0.6)
+                points(start(reduced_chr),mcols(reduced_chr)$binned_AAF1,
+                    pch=16,col="red",cex=0.6)
+                points(start(reduced_chr),mcols(reduced_chr)$binned_AAF2,
+                    pch=16,col="blue",cex=0.6)
             }
             
             if(length(chr_f)>=1){
-                plot(start(chr_f),mcols(chr_f)$AAF,pch=16,cex=0.5,ylim=c(0,1),xlab=tmp_seq,ylab="AAF",main="after",xlim=c(0,max(start(chr))))
+                plot(start(chr_f),mcols(chr_f)$AAF,pch=16,cex=0.5,ylim=c(0,1),
+                    xlab=tmp_seq,ylab="AAF",main="after",xlim=c(0,max(start(chr))))
             }
             
             chr_remove = chr[!keep_idx]
             if(length(chr_remove)>=1){
-                plot(start(chr_remove),mcols(chr_remove)$AAF,pch=16,cex=0.5,ylim=c(0,1),xlab=tmp_seq,ylab="AAF",main="removed",xlim=c(0,max(start(chr))))
+                plot(start(chr_remove),mcols(chr_remove)$AAF,pch=16,cex=0.5,ylim=c(0,1),
+                    xlab=tmp_seq,ylab="AAF",main="removed",xlim=c(0,max(start(chr))))
                 dup = duplicated(mcols(chr_remove)$binned_AAF1)
                 reduced_chr_remove = chr_remove[!dup]
-                points(start(reduced_chr_remove),mcols(reduced_chr_remove)$binned_AAF1,pch=16,col="red",cex=0.6)
-                points(start(reduced_chr_remove),mcols(reduced_chr_remove)$binned_AAF2,pch=16,col="blue",cex=0.6)
+                points(start(reduced_chr_remove),mcols(reduced_chr_remove)$binned_AAF1,
+                    pch=16,col="red",cex=0.6)
+                points(start(reduced_chr_remove),mcols(reduced_chr_remove)$binned_AAF2,
+                    pch=16,col="blue",cex=0.6)
             }
         }
     }

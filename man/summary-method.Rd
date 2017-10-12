@@ -2,13 +2,8 @@
 % Please edit documentation in R/MadSeqMethod.R
 \docType{methods}
 \name{summary,MadSeq-method}
-<<<<<<< HEAD
 \alias{summary,MadSeq-method}
 \alias{summary}
-=======
-\alias{summary}
-\alias{summary,MadSeq-method}
->>>>>>> upstream/master
 \title{Summarize statistics of the MadSeq object}
 \usage{
 \S4method{summary}{MadSeq}(object)

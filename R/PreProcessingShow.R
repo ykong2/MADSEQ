@@ -203,7 +203,7 @@ normalizeCoverage = function(
     
     ## check if all the samples have the same number of targeted region
     if (length(unique(sapply(data,length)))>1){
-        cat(elementLengths(data))
+        cat(elementNROWS(data))
         stop("the number of targeted region is different in your samples, 
             please check your input")
     }
@@ -356,7 +356,7 @@ prepareHetero = function(
     ## read in target bed table
     target_gr = rtracklayer::import(target_bed)
     if(nchar(seqlevels(target_gr)[1])>3){
-        seqlevels(target_gr,pruning.mode="coarse")=
+        seqlevels(target_gr,force=TRUE)=
                                       c("chr1","chr2","chr3","chr4","chr5",
                                         "chr6","chr7","chr8","chr9","chr10",
                                         "chr11","chr12","chr13","chr14",
@@ -365,7 +365,7 @@ prepareHetero = function(
                                         "chrX","chrY")
     }
     else{
-        seqlevels(target_gr,pruning.mode="coarse")=
+        seqlevels(target_gr,force=TRUE)=
                                         c("1","2","3","4","5",
                                           "6","7","8","9","10",
                                           "11","12","13","14",

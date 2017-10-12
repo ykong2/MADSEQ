@@ -12,7 +12,7 @@ Description: The MADSEQ package provides a group of hierarchical
         quantification of the fraction of aneuploid cells in the
         sample.
 License: GPL(>=2)
-Depends: R(>= 3.3), rjags(>= 4-6),
+Depends: R(>= 3.4), rjags(>= 4-6),
 Suggests: knitr
 VignetteBuilder: knitr
 LazyData: True
