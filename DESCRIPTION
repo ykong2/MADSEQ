@@ -2,7 +2,7 @@ Package: MADSEQ
 Type: Package
 Title: Mosaic Aneuploidy Detection and Quantification using Massive
         Parallel Sequencing Data
-Version: 1.4.0
+Version: 1.4.1
 Date: 2017-04-29
 Author:Yu Kong, Adam Auton, John Murray Greally
 Maintainer: Yu Kong <yu.kong@phd.einstein.yu.edu>
