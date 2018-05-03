@@ -57,7 +57,24 @@ prepareCoverageGC = function(
                     length(gc), 
                     "GC content calculated.Please check your input.",
                     sep=" "))
+<<<<<<< HEAD
     target_gr
+=======
+    
+    ## filter out regions around gaps
+    target_gr_deGAP = removeGap(target_gr,genome_assembly) 
+    
+    ## filter out HLA regions
+    target_gr_deHLA = removeHLA(target_gr_deGAP,genome_assembly)
+    
+    ## filter out other highly polymorphic regions
+    target_gr_deAQP = removeAQP(target_gr_deHLA,genome_assembly)
+    
+    ## filter out regions overlap with repeats
+    #target_gr_final = removeRE(target_gr_deAQP,genome_assembly)
+    target_gr_final = target_gr_deAQP
+    target_gr_final
+>>>>>>> b132c56... removed RE.rds because it's larger than 5MB, will update it soon from AnnotationHub
 }
 
 ##############################################################################
