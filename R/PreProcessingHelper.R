@@ -51,7 +51,7 @@ getCoverage = function(
     }
     target_gr = sort(target_gr)
     # remove regions overlapped with REs
-    target_gr = removeRE(target_gr,genome_assembly)
+    #target_gr = removeRE(target_gr,genome_assembly)
     target_gr = removeGap(target_gr,genome_assembly)
     target_gr = removeHLA(target_gr,genome_assembly)
     target_gr = removeAQP(target_gr,genome_assembly)
