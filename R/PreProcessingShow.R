@@ -68,8 +68,8 @@ prepareCoverageGC = function(
     target_gr_deAQP = removeAQP(target_gr_deHLA,genome_assembly)
     
     ## filter out regions overlap with repeats
-    target_gr_final = removeRE(target_gr_deAQP,genome_assembly)
-    
+    #target_gr_final = removeRE(target_gr_deAQP,genome_assembly)
+    target_gr_final = target_gr_deAQP
     target_gr_final
 }
 
