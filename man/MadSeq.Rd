@@ -2,8 +2,8 @@
 % Please edit documentation in R/AllClasses.R
 \docType{class}
 \name{MadSeq-class}
-\alias{MadSeq}
 \alias{MadSeq-class}
+\alias{MadSeq}
 \title{The MadSeq class}
 \description{
 An S4 class contains estimated result returned from \code{\link{runMadSeq}}
@@ -23,6 +23,7 @@ deltaBIC ~ [2,6]: Positive
 deltaBIC ~ [6,10]: Strong
 deltaBIC >10: Very Strong}
 }}
+
 \section{Accessors}{
 
 \describe{In the code below, \code{x} is a \code{MadSeq} object. \cr\cr
@@ -49,10 +50,9 @@ fraction of aneuploid sample. \cr\cr
 the selected model.}
 }
 
-\author{
-Yu Kong
-}
 \seealso{
 \code{\link{runMadSeq}}, \code{\link{plotMadSeq}}
 }
-
+\author{
+Yu Kong
+}

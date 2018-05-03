@@ -110,9 +110,6 @@ aneuploidy_chr18 = runMadSeq(aneuploidy_hetero, aneuploidy_normed_cov,
                              target_chr="chr18", adapt=100, burnin=200,
                              nChain =1, nStep = 1000, thinSteps=1)
 }
-\author{
-Yu Kong
-}
 \references{
 Martyn Plummer (2016). rjags: Bayesian Graphical Models using 
 MCMC. R package version 4-6. \cr
@@ -122,4 +119,6 @@ MCMC. R package version 4-6. \cr
 \code{\link{MadSeq}}, \code{\link{plotMadSeq}},
  \code{\link{plotFraction}}, \code{\link{plotMixture}}
 }
-
+\author{
+Yu Kong
+}

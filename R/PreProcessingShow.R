@@ -57,7 +57,20 @@ prepareCoverageGC = function(
                     length(gc), 
                     "GC content calculated.Please check your input.",
                     sep=" "))
-    target_gr
+    
+    ## filter out regions around gaps
+    target_gr_deGAP = removeGap(target_gr,genome_assembly) 
+    
+    ## filter out HLA regions
+    target_gr_deHLA = removeHLA(target_gr_deGAP,genome_assembly)
+    
+    ## filter out other highly polymorphic regions
+    target_gr_deAQP = removeAQP(target_gr_deHLA,genome_assembly)
+    
+    ## filter out regions overlap with repeats
+    target_gr_final = removeRE(target_gr_deAQP,genome_assembly)
+    
+    target_gr_final
 }
 
 ##############################################################################
@@ -335,6 +348,7 @@ normalizeCoverage = function(
 #' @import BSgenome
 #' @import GenomicRanges
 #' @import IRanges
+#' @importFrom vcfR read.vcfR
 #' @importFrom GenomeInfoDb keepStandardChromosomes
 #' @importFrom graphics points
 #' @importFrom SummarizedExperiment rowRanges
@@ -355,83 +369,70 @@ prepareHetero = function(
     ## set the target region
     ## read in target bed table
     target_gr = rtracklayer::import(target_bed)
-    if(nchar(seqlevels(target_gr)[1])>3){
-        seqlevels(target_gr,pruning.mode="coarse")=
-                                      c("chr1","chr2","chr3","chr4","chr5",
-                                        "chr6","chr7","chr8","chr9","chr10",
-                                        "chr11","chr12","chr13","chr14",
-                                        "chr15","chr16","chr17","chr18",
-                                        "chr19","chr20","chr21","chr22",
-                                        "chrX","chrY")
-    }
-    else{
-        seqlevels(target_gr,pruning.mode="coarse")=
-                                        c("1","2","3","4","5",
-                                          "6","7","8","9","10",
-                                          "11","12","13","14",
-                                          "15","16","17","18",
-                                          "19","20","21","22",
-                                          "X","Y")
-    }
-    target_gr = sort(target_gr)
+    target_gr = keepStandardChromosomes(target_gr,pruning.mode = "coarse")
+    
     ## get sample name
     sample_name = strsplit(vcffile,"/")[[1]]
     sample_name = sample_name[length(sample_name)]
-    ## set the param for vcf: 
-    ## 1. keep genotype, allelic depth and depth from VCF file
-    ## 2. only keep sites that are located in targeted regions
-    vcf_param = ScanVcfParam(geno=c("GT","AD","DP"),which=target_gr)
     
-    ## filter vcf by:
-    ## 1. only keep heterozygous site
-    des_vcf = tempfile()
-    vcf = filterVcf(vcffile, genome=genome,
-                    filters=FilterRules(list(isHetero=isHetero)),
-                    param=vcf_param,
-                    destination=des_vcf)
-    dat = readVcf(des_vcf,genome=genome)
-    unlink(des_vcf)
-    res = SummarizedExperiment::rowRanges(dat)
-    gt = unname(geno(dat)$GT[,1])
-    dp = unname(geno(dat)$DP[,1])
-    ad = geno(dat)$AD
-    ref_d = sapply(ad,function(x)x[1])
-    alt_d = sapply(ad,function(x)x[2])
+    message("reading vcf file")
+    vcf = read.vcfR(vcffile)
     
-    mcols(res)$GT = gt
-    mcols(res)$DP = dp
-    mcols(res)$Ref_D = ref_d
-    mcols(res)$Alt_D = alt_d
-    mcols(res)$REF = as.character(mcols(res)$REF)
-    tmp_alt = lapply(mcols(res)$ALT,as.character)
-    tmp_alt = lapply(tmp_alt,function(x)x[x!="<NON_REF>"])
-    tmp_alt = sapply(tmp_alt,paste,collapse = ",")
-    mcols(res)$ALT = tmp_alt
+    # get basic pos
+    message("processing vcf file")
+    basic_factor = c("CHROM","POS","REF","ALT","QUAL","FILTER")
+    basic = vcf@fix
+    basic = basic[,colnames(basic)%in%basic_factor]
+    
+    # get GT and AD
+    genotype = vcf@gt
+    gt_info = genotype[,2]
+    gt = sapply(gt_info,function(x)strsplit(x,split=":",fixed=TRUE)[[1]][1])
+    ad = sapply(gt_info,function(x)strsplit(x,split=":",fixed=TRUE)[[1]][2])
+    ref_d = as.numeric(sapply(ad,function(x)strsplit(x,split=",",fixed=TRUE)[[1]][1]))
+    alt_d = as.numeric(sapply(ad,function(x)strsplit(x,split=",",fixed=TRUE)[[1]][2]))
+    
+    res = GRanges(seqnames=basic[,"CHROM"],
+                  ranges=IRanges(start=as.numeric(basic[,"POS"]),end=as.numeric(basic[,"POS"])))
+    mcols = data.frame(basic[,-c(1,2)],GT=gt,Ref_D=ref_d,Alt_D=alt_d,DP=ref_d+alt_d)
+    mcols(res) = mcols
+    
+    ## keep only SNPs
+    res = res[mcols(res)$GT=="0/1"|mcols(res)$GT=="1/0"]
+    
     res = res[!is.na(mcols(res)$Alt_D)&
-                !is.na(mcols(res)$Ref_D)&
-                !is.na(mcols(res)$REF)&
-                !is.na(mcols(res)$ALT)]
+                  !is.na(mcols(res)$Ref_D)&
+                  !is.na(mcols(res)$REF)&
+                  !is.na(mcols(res)$ALT)]
     names(res) = seq(1:length(res))
     
+    ## keep only SNPs in target regions
+    ov = findOverlaps(res,target_gr)
+    res = unique(res[queryHits(ov)])
+    mcols(res)$ALT = gsub("\\,<NON_REF>","",mcols(res)$ALT)
     ## filter:
+    message("filtering vcf file")
     ## 1. filter out non standard chromosome
-    res = keepStandardChromosomes(res)
+    res = keepStandardChromosomes(res,pruning.mode = "coarse")
     
-    ## 2.total number of reads >= 10 + reads supporting minor allele >= 3
-    res = res[mcols(res)$DP>=10&mcols(res)$Ref_D>=3&mcols(res)$Alt_D>=3]
+    ## 2.filter low DP/Ref_D/Alt_D by 5% quantile
+    DP_cut = quantile(mcols(res)$DP,0.05)
+    Ref_D_cut = quantile(mcols(res)$Ref_D,0.05)
+    Alt_D_cut = quantile(mcols(res)$Alt_D,0.05)
+    res = res[mcols(res)$DP>DP_cut&mcols(res)$Ref_D>Ref_D_cut&mcols(res)$Alt_D>Alt_D_cut]
     
-    ## 3. keep only SNP
-    res = res[nchar(mcols(res)$REF)==1&nchar(mcols(res)$ALT)==1]
-    res = res[nchar(unlist(mcols(res)$ALT))==1]
-    ## if write to file requested, then write filtered heterozygous sites into
-    ## file, otherwise return it as a GRanges object
-    
-    ## 4. remove SNPs around gap
+    ## 3. remove SNPs around gap
     res = removeGap(res,genome)
     
-    ## 5. further treat regions most of the SNP are biased due to sequencing issues
+    ## 4. filter out HLA region on chr6 due to the polymorphics of HLA, the calling of heterozygous sites are ambiguous most of the time
+    res = removeHLA(res,genome)
+    
+    ## 5. the AQP7 region on chr9 also has ambigous heterozygous calling because of the polymorphics, we will remove them for downstream analysis
+    res = removeAQP(res,genome)
+    
+    ## 6. further treat regions most of the SNP are biased due to sequencing issues
     res = filter_hetero(res,binsize=10,plot=plot)
-
+    
     if(writeToFile == TRUE){
         ## check if path to write file is provided,
         ## if not write to current working directory
@@ -440,11 +441,11 @@ prepareHetero = function(
         data = as.data.frame(res)
         write.table(data,
                     file=paste(path, "/" , sample_name,
-                                "_filtered_heterozygous.txt", sep=""),
+                               "_filtered_heterozygous.txt", sep=""),
                     quote=FALSE, row.names=FALSE, col.names=TRUE, sep="\t")
         message(paste("filtered heterozygous sites for sample ",sample_name,
-                        " is written to ",path, "/" , sample_name,
-                        "_filtered_heterozygous.txt",sep=""))
+                      " is written to ",path, "/" , sample_name,
+                      "_filtered_heterozygous.txt",sep=""))
     }
     else
         res

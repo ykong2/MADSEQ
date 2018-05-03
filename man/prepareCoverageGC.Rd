@@ -47,4 +47,3 @@ normal_cov_gc = prepareCoverageGC(target,normal_bam,"hg19")
 \author{
 Yu Kong
 }
-

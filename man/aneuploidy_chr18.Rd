@@ -24,5 +24,3 @@ data(aneuploidy_chr18)
 summary(aneuploidy_chr18)
 }
 \keyword{datasets}
-
-

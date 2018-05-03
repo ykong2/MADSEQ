@@ -1,1 +1,4 @@
-#no news#
+#updates 05/03/2018#
+Updated the prepareHetero() function to make it more efficient.
+Filtered repetitive regions when normalizing coverage.
+Filtered out SNPs in HLA and GAP regions to get more stable result.

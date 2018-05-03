@@ -2,7 +2,7 @@ Package: MADSEQ
 Type: Package
 Title: Mosaic Aneuploidy Detection and Quantification using Massive
         Parallel Sequencing Data
-Version: 1.5.0
+Version: 1.6.1
 Date: 2017-04-29
 Author:Yu Kong, Adam Auton, John Murray Greally
 Maintainer: Yu Kong <yu.kong@phd.einstein.yu.edu>
@@ -20,7 +20,7 @@ Imports: VGAM, coda, BSgenome, BSgenome.Hsapiens.UCSC.hg19, S4Vectors,
         methods, preprocessCore, GenomicAlignments, Rsamtools,
         Biostrings, GenomicRanges, IRanges, VariantAnnotation,
         SummarizedExperiment, GenomeInfoDb, rtracklayer, graphics,
-        stats, grDevices, utils, zlibbioc
+        stats, grDevices, utils, zlibbioc, vcfR
 biocViews: GenomicVariation, SomaticMutation, VariantDetection,
         Bayesian, CopyNumberVariation, Sequencing, Coverage
 URL: https://github.com/ykong2/MADSEQ
