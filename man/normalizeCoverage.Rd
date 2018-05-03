@@ -125,11 +125,6 @@ normalizeCoverage(aneuploidy_cov_gc,control=normal_cov_gc,
                   writeToFile=TRUE,destination=".")
 
 }
-
-\author{
-Yu Kong
-}
-
 \references{
 C. Alkan, J. Kidd, T. Marques-Bonet et al (2009).
 Personalized copy number and segmental duplication maps using 
@@ -138,4 +133,6 @@ next-generation sequencing. Nature Genetics, 41(10):1061-7.
 \seealso{
 \code{\link{prepareCoverageGC}}
 }
-
+\author{
+Yu Kong
+}

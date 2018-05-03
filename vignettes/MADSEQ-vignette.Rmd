@@ -212,11 +212,11 @@ aneuploidy_vcf = system.file("extdata","aneuploidy.vcf.gz",package="MADSEQ")
 
 ## If you choose to write the output to file (recommended)
 prepareHetero(aneuploidy_vcf, target, genome="hg19", 
-              writeToFile=TRUE, destination=".")
+              writeToFile=TRUE, destination=".",plot = FALSE)
 
 ## If you don't want to write output to file
 aneuploidy_hetero = prepareHetero(aneuploidy_vcf, target,
-                                  genome="hg19", writeToFile=FALSE)
+                                  genome="hg19", writeToFile=FALSE,plot = FALSE)
 
 ```
 
@@ -276,12 +276,14 @@ The __MadSeq__ object from the __runMadSeq__ function contains:
 * The delta BIC value between selected model and other models
 
 __Note:__ The value of delta BIC suggests the strength of the confidence of the
-selected model against other models. It can be summarized as
+selected model against other models. In our model, you can set a threshold to get
+high confidence result, usually it's **20** in our testing cases. We summarize 
+it as follows
 
 ```{r,echo=FALSE,warning=FALSE}
-BIC = c("[0,2]","(2,6]","(6,10]",">10")
-evidence = c("Not worth more than a bare mention","Positive",
-             "Strong","Very Strong")
+BIC = c("[0,10]","(10,20]",">20")
+evidence = c("Probably noisy data","Could be positive",
+             "High confidence")
 table = data.frame(BIC,evidence)
 library(knitr)
 kable(table,col.names =c("deltaBIC","Evidence against higher BIC") ,align="c")

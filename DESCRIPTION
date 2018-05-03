@@ -20,7 +20,7 @@ Imports: VGAM, coda, BSgenome, BSgenome.Hsapiens.UCSC.hg19, S4Vectors,
         methods, preprocessCore, GenomicAlignments, Rsamtools,
         Biostrings, GenomicRanges, IRanges, VariantAnnotation,
         SummarizedExperiment, GenomeInfoDb, rtracklayer, graphics,
-        stats, grDevices, utils, zlibbioc
+        stats, grDevices, utils, zlibbioc, vcfR
 biocViews: GenomicVariation, SomaticMutation, VariantDetection,
         Bayesian, CopyNumberVariation, Sequencing, Coverage
 URL: https://github.com/ykong2/MADSEQ

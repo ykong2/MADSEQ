@@ -50,8 +50,13 @@ getCoverage = function(
                                             "X","Y")
     }
     target_gr = sort(target_gr)
+    # remove regions overlapped with REs
+    target_gr = removeRE(target_gr,genome_assembly)
+    target_gr = removeGap(target_gr,genome_assembly)
+    target_gr = removeHLA(target_gr,genome_assembly)
+    target_gr = removeAQP(target_gr,genome_assembly)
     nRegion = length(target_gr)
-    cat(paste(nRegion, "regions from", length(seqlevels(target_gr)),
+    cat(paste(nRegion, "non-repeats regions from", length(seqlevels(target_gr)),
                 "chromosomes in the bed file.", sep=" "))
     ## use helper function to calculate average coverage for each region, 
     ## in order to handle large bam files, 
@@ -302,7 +307,7 @@ calculateNormedCoverage = function(
         before_chr = replace(before_chr,is.nan(before_chr),0)
         quantiled_chr = replace(quantiled_chr,is.nan(quantiled_chr),0)
         ## plot
-        cols = sample(grDevices::colors(),nSample)
+        cols = sample(grDevices::colors(),nSample,replace = TRUE)
         nChr = ncol(after_chr)
         ## 1. plot raw coverage
         plot(1:nChr,rep(1,nChr),type="n",
@@ -373,9 +378,105 @@ removeGap = function(gr,genome){
     }
     
     ov = findOverlaps(gr,gap_gr)
-    res_degap = gr[-queryHits(ov)]
+    if(length(ov)==0){
+        res_degap = gr
+    }
+    else
+        res_degap = gr[-queryHits(ov)]
     res_degap
 }
+
+## remove SNPs inside the HLA region on chr6
+# because of the variability of HLA regions, 
+# variant calling for this region is problematic most of the time, 
+# to keep a clean result, we will filter out SNPs called within this region
+# padded 1000kb up and downstream of HLA region
+
+removeHLA = function(gr,genome){
+    # 1. load the HLA coordinates for the input genome
+    if(length(grep("19",genome))>0){
+        path = system.file("HLA","hg19_HLA_gr.RDS",package="MADSEQ")
+        HLA_gr = readRDS(path)
+    }
+    else if(length(grep("37",genome))>0){
+        path = system.file("HLA","hs37d5_HLA_gr.RDS",package="MADSEQ")
+        HLA_gr = readRDS(path)
+    }
+    else if(length(grep("38",genome))>0){
+        path = system.file("HLA","hg38_HLA_gr.RDS",package="MADSEQ")
+        HLA_gr = readRDS(path)
+    }
+    
+    ov = findOverlaps(gr,HLA_gr)
+    
+    if(length(ov)==0){
+        res_deHLA = gr
+    }
+    else
+        res_deHLA = gr[-queryHits(ov)]
+    res_deHLA
+}
+
+## remove SNPs inside the AQP7 region on chr9
+# because of the variability of AQP7, 
+# variant calling for this region is problematic most of the time, 
+# to keep a clean result, we will filter out SNPs called within this region
+# padded 1000kb up and downstream of AQP7 region
+removeAQP = function(gr,genome){
+    # 1. load the AQP7 coordinates for the input genome
+    if(length(grep("19",genome))>0){
+        path = system.file("AQP7","hg19_AQP7_gr.RDS",package="MADSEQ")
+        AQP7_gr = readRDS(path)
+    }
+    else if(length(grep("37",genome))>0){
+        path = system.file("AQP7","hs37d5_AQP7_gr.RDS",package="MADSEQ")
+        AQP7_gr = readRDS(path)
+    }
+    else if(length(grep("38",genome))>0){
+        path = system.file("AQP7","hg38_AQP7_gr.RDS",package="MADSEQ")
+        AQP7_gr = readRDS(path)
+    }
+    
+    ov = findOverlaps(gr,AQP7_gr)
+    
+    if(length(ov)==0){
+        res_deAQP7 = gr
+    }
+    else
+        res_deAQP7 = gr[-queryHits(ov)]
+    res_deAQP7
+}
+
+## remove coverage inside the repetitive regions (RE)
+# because of multimappability in REs
+# mapping depth for these regions can be not accurate, 
+# to keep a clean result, we will filter out regions overlapped with RE
+removeRE = function(gr,genome){
+    # 1. load the HLA coordinates for the input genome
+    if(length(grep("19",genome))>0){
+        path = system.file("RE","hg19_RE_gr.RDS",package="MADSEQ")
+        RE_gr = readRDS(path)
+    }
+    else if(length(grep("37",genome))>0){
+        path = system.file("RE","hg19_RE_gr.RDS",package="MADSEQ")
+        RE_gr = readRDS(path)
+        seqlevelsStyle(RE_gr) = "ncbi"
+    }
+    else if(length(grep("38",genome))>0){
+        path = system.file("RE","hg38_RE_gr.RDS",package="MADSEQ")
+        RE_gr = readRDS(path)
+    }
+    
+    ov = findOverlaps(gr,RE_gr)
+    
+    if(length(ov)==0){
+        res_deRE = gr
+    }
+    else
+        res_deRE = gr[-queryHits(ov)]
+    res_deRE
+}
+
 
 ## remove regions with densed biased SNPs (usually regions around gaps/SVs)
 filter_hetero = function(data,binsize=10,plot=TRUE){
